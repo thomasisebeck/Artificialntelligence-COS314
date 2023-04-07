@@ -172,10 +172,10 @@ public:
         std::cout << std::setw(17) << std::left << "SET                \tILS\tTaboo" << std::endl;
 
         for (runtimeResult r : results)
-            std::cout << std::setw(17) << std::left << r.problemSet << "\t" << r.ILSRuntime * 100 << "\t" << r.TabooRuntime * 100 << std::endl;
+            std::cout << std::setw(17) << std::left << r.problemSet << "\t" << r.ILSRuntime << "\t" << r.TabooRuntime << std::endl;
 
         std::cout << "-----------------------------------" << std::endl;
-        std::cout << "Avg                     " << totalILS * 100 << "\t" << totalTaboo * 100 << std::endl;
+        std::cout << "Avg                     " << totalILS << "ms\t" << totalTaboo << "ms" << std::endl;
         std::cout << "-----------------------------------" << std::endl;
     }
 };

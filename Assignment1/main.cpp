@@ -222,7 +222,7 @@ int main() {
 
         auto end1 = std::chrono::steady_clock::now();
         auto diff = end1 - start1;
-        ILSTime = std::chrono::duration<double, std::milli> (diff).count() / 1000;
+        ILSTime = std::chrono::duration<double, std::milli> (diff).count();
         dataSet.addRunTime(getSetFromPath(f.filePath), ILSTime, ITERATED_LOCAL);
 
         //----------------------- test Taboo -------------------------//
@@ -234,7 +234,7 @@ int main() {
 
         end1 = std::chrono::steady_clock::now();
         diff = end1 - start1;
-        tabooTime = std::chrono::duration<double, std::milli> (diff).count() / 1000;
+        tabooTime = std::chrono::duration<double, std::milli> (diff).count();
         dataSet.addRunTime(getSetFromPath(f.filePath), tabooTime, TABOO);
     }
 
