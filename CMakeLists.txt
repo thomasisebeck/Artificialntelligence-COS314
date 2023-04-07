@@ -1629,4 +1629,4 @@ add_executable(COS314
         Assignment1/BinSetBestFit.h
         Assignment1/BinSetFirstFit.h
         Assignment1/main.cpp
-        Assignment1/makefile)
+        )

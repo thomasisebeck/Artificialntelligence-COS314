@@ -19,7 +19,7 @@ struct column {
 struct runtime {
     std::string problemSet;
     double runtime;
-    searchType searchType;
+    searchType stype;
 };
 
 struct runtimeResult {
@@ -146,7 +146,7 @@ public:
             totalILS = 0;
             for (runtime r: runtimes) {
                 if (r.problemSet == set) {
-                    if (r.searchType == TABOO){
+                    if (r.stype == TABOO){
                         countTaboo++;
                         totalTaboo += r.runtime;
                     }
