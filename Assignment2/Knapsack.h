@@ -4,9 +4,13 @@
 
 class Knapsack {
 private:
-    std::vector<Item> items;
     int totalWeight;
+    int populationSize;
+protected:
+    std::vector<Item> items;
 public:
-    Knapsack(std::vector<Item> items, int totalWeight);
+    Knapsack(std::vector<Item> items, int totalWeight, int populationSize);
+    int getWeight() const;
+    int getPopulationSize() const;
 };
 
