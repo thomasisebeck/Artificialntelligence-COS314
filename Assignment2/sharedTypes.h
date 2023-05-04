@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <string>
+
 using namespace std;
 
 struct Item {
@@ -11,4 +13,5 @@ struct problemInstance {
     vector<Item> items;
     int optimum;
     string name;
+    int capacity;
 };
