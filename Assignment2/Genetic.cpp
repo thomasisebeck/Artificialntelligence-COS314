@@ -1,7 +1,7 @@
 #include <utility>
 #include <list>
 
-#include "Genectic.h"
+#include "Genetic.h"
 
 Genetic::Genetic(std::vector<Item> items, int totalWeight, int populationSize, float crossoverDecimal)
             : Knapsack(items, totalWeight, populationSize) {
