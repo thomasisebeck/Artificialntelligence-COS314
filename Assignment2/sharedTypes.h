@@ -9,6 +9,10 @@ struct Item {
     int value;
 };
 
+enum testType {
+    GENETIC
+};
+
 struct problemInstance {
     vector<Item> items;
     int optimum;
