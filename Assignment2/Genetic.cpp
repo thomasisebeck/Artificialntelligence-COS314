@@ -7,7 +7,7 @@ Genetic::Genetic(std::vector<Item> items, int totalWeight, int populationSize, f
             : Knapsack(items, totalWeight, populationSize) {
 
     //create set of 10 bitstrings....
-    for (int j = 0; j < tournamentSize; j++) {
+    for (int j = 0; j < populationSize; j++) {
 
         //initialise the offspring list randomly
         vector<bool> bistring = {};
@@ -19,7 +19,7 @@ Genetic::Genetic(std::vector<Item> items, int totalWeight, int populationSize, f
         offspring.push_back(bistring);
     }
 
-    this->numCrossover = items.size() * crossoverDecimal;
+    this->numCrossover = populationSize * crossoverDecimal;
     if (this->numCrossover % 2 != 0) //not an even number, change
         this->numCrossover--;
 
@@ -28,6 +28,8 @@ Genetic::Genetic(std::vector<Item> items, int totalWeight, int populationSize, f
         crossoverIndices.push_back(i);
 
     this->tournamentSize = tournamentSize;
+
+    this->mutationRate = mutationRate;
 }
 
 int Genetic::getFitness(const std::vector<bool> bistring) {
@@ -73,31 +75,76 @@ void Genetic::printPopulation() {
     cout << "------------------------------" << endl;
 }
 
-void Genetic::selection() {
-    //select the fittest individuals until it reaches the tournament size
-    //using routlette wheel
+int Genetic::getBestFitnessIndex(vector< vector<bool> > individuals) {
+    int bestFitness = getFitness(individuals[0]);
+    vector< vector<bool> >::iterator iter;
+    int index = 0;
+    int bestIndex = 0;
 
-    std::vector< std::vector<bool> > newOffspring;
-
-    for (int i = 0; i < tournamentSize; i++) {
-        int ind1 = rand() % offspring.size();
-        int ind2 = rand() % offspring.size();
-        while (ind2 == ind1)
-            ind2 = rand() % offspring.size();
-
-        offspring[ind1];
-        offspring[ind2];
-
-        if (getFitness(offspring[ind1]) >= getFitness(offspring[ind2]))
-            //select ind1
-            newOffspring.push_back(offspring[ind1]);
-        else
-            //select ind2
-            newOffspring.push_back(offspring[ind2]);
+    for (iter = individuals.begin(); iter != individuals.end(); iter++) {
+        if (getFitness(*iter) > bestFitness) {
+            bestFitness = getFitness(*iter);
+            bestIndex = index;
+        }
+        index++;
     }
 
-    //select the fittest individuals
-    offspring = newOffspring;
+    return bestIndex;
+}
+
+vector<bool> Genetic::getBestIndividual(vector< vector<bool> > individuals) {
+    int bestFitness = getFitness(individuals[0]);
+    int bestIndex = 0;
+
+    for (int i = 1; i < individuals.size(); i++) {
+        if (getFitness(individuals[i]) > bestFitness) {
+            bestFitness = getFitness(individuals[i]);
+            bestIndex = i;
+        }
+    }
+
+    return individuals[bestIndex];
+}
+
+std::vector<bool> Genetic::getBest() {
+    return getBestIndividual(this->offspring);
+}
+
+
+void Genetic::tournamentSelection() {
+    //select k individuals at random from the population
+    //select the best on from those k individuals
+    //repeat until reached desired population size
+
+    vector< vector<bool> > tournament;
+    vector< vector<bool> > newIndividuals;
+    vector< vector<bool> > offspringCopy;
+    vector<int> indicesToReplace;
+
+
+    for (int i = 0; i < offspring.size(); i++) {
+
+        offspringCopy.clear();
+        vector< vector<bool> >::iterator iter;
+        for (iter = offspring.begin(); iter != offspring.end(); iter++)
+            offspringCopy.push_back(*iter);
+
+        //create the tournament with k random individuals
+        //while removing them from the current offspring
+        for (int i = 0; i < tournamentSize; i++) {
+            int randomNumber = rand() % offspringCopy.size();
+            tournament.push_back(*offspringCopy.erase(offspringCopy.begin() + randomNumber));
+        }
+
+        //get the best individual in the tournament
+        vector<bool> individual = getBestIndividual(tournament);
+
+        //add this best individual to the new individuals
+        newIndividuals.push_back(individual);
+
+    }
+
+    offspring = newIndividuals;
 
 }
 
@@ -106,7 +153,7 @@ void Genetic::mutate() {
     //check if we must mutate...
 
     for (int i = 0; i < offspring.size(); i++)
-        if (rand() % 100 > 100 * mutationRate) { //0 to 99, random number greater than mutation rate
+        if (rand() % 100 <= 100 * mutationRate) { //0 to 99, random number greater than mutation rate
             //mutate the current offspring by flipping the bit
             int ind = rand() % offspring[i].size();
             if (offspring[i][ind] == 0)
@@ -119,37 +166,46 @@ void Genetic::mutate() {
 void Genetic::crossOver() {
     //select a subset for crossover
 
-    //copy the indices array
-    vector<int> indices = this->crossoverIndices;
+    //copy the crossoverIndices array
+    vector<int> indices;
+    indices.clear();
+    vector<int>::iterator iter;
+    for (iter = crossoverIndices.begin(); iter != crossoverIndices.end(); iter++)
+        indices.push_back(*iter);
+
     vector<int> chosenIndices;
 
     srand(time(NULL));
 
     //get random crossover indices to perform the crossover in pairs
-    while(indices.size() > 0) {
+    while (!indices.empty()) {
 
-        int random = rand() % indices.size();
-        while (random == 0)
-            random = rand();
-        //random number
-        int randNumber = random % indices.size();
+        int random;
+
+        if (indices.size() == 1)
+            random = 0;
+        else
+            random = rand() % indices.size();
 
 
         //add that value to the chose indices array
-        int index = indices[randNumber];
+        int index = indices[random];
         chosenIndices.push_back(index);
 
         //remove the value from the index array
-        auto value = indices.begin() + randNumber;
+        auto value = indices.begin() + random;
         indices.erase(value);
     }
 
     //crossover the indices
     //get 2 at a time
-    while (chosenIndices.size() > 0) {
-        int ind1 = chosenIndices[chosenIndices.size() - 1];
+    while (!chosenIndices.empty()) {
+        int ind1 = chosenIndices.back();
         chosenIndices.pop_back();
-        int ind2 = chosenIndices[chosenIndices.size() - 1];
+
+        if (chosenIndices.empty())
+            cout << "Is empty! something went wrong!" << endl;
+        int ind2 = chosenIndices.back();
         chosenIndices.pop_back();
 
         //crossover the 2 parents

@@ -11,12 +11,15 @@ private:
     int numCrossover;
     int tournamentSize;
     float mutationRate;
+    vector<bool> getBestIndividual(vector< std::vector<bool> > individuals);
+    int getBestFitnessIndex(vector< vector<bool> > individuals);
 public:
     Genetic(std::vector<Item> items, int totalWeight, int populationSize, float crossoverDecimal, float mutationRate, int tournamentSize);
     int getFitness(const std::vector<bool> bistring);
     void crossOver();
     void printPopulation();
     void mutate();
-    void selection();
+    void tournamentSelection();
     void printBistring(vector<bool> bistring);
+    std::vector<bool> getBest();
 };

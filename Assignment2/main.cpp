@@ -8,36 +8,43 @@ using namespace std;
 
 void testInstance(problemInstance instance, testType type) {
 
-    const int POPULATION_SIZE = 10;
-    const float CROSSOVER_RATE = 0.7;
-    const float MUTATION_RATE = 0.1;
-    const int TOURNAMENT_SIZE = POPULATION_SIZE * 0.6;
-    const int NUMBER_OF_GENERATIONS = 500;
+    const int POPULATION_SIZE = 50;
 
-    cout << "Testing instance" << endl;
-    cout << "Items: " << endl;
-    for (Item i: instance.items)
-        cout << i.weight << " " << i.value << endl;
+    //must be even
+    const float CROSSOVER_RATE = 0.8;
+    const float MUTATION_RATE = 0.5;
+    const int TOURNAMENT_SIZE = 5;
+    const int NUMBER_OF_GENERATIONS = 25;
+    const int NUMBER_OF_RUNS = 10;
+    vector<bool> bestIndividual = {};
 
     switch (type) {
         case GENETIC:
-            //create a genetic class
-            Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,
-                        CROSSOVER_RATE, MUTATION_RATE, TOURNAMENT_SIZE);
 
-            cout << "initial: " << endl;
-            gen.printPopulation();
+            cout << "Genetic: " << instance.name << endl;
 
-            for (int i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-                gen.crossOver();
-                gen.selection();
-                gen.mutate();
+            for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 
-                cout << "after mutation: " << endl;
-                gen.printPopulation();
+                //create a genetic class
+                Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,
+                            CROSSOVER_RATE, MUTATION_RATE, TOURNAMENT_SIZE);
+
+                for (int i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+                    gen.crossOver();
+                    gen.tournamentSelection();
+                    gen.mutate();
+                    if (bestIndividual.empty() || gen.getFitness(bestIndividual) < gen.getFitness(gen.getBest()))
+                        bestIndividual = gen.getBest();
+                }
+
+                if (i == NUMBER_OF_RUNS - 1) {
+                    cout << "Best individual: ";
+                    gen.printBistring(bestIndividual);
+                    cout << "Best fitness: " << gen.getFitness(bestIndividual) << endl;
+                }
+
             }
 
-            break;
     }
 }
 
