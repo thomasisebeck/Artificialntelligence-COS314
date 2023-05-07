@@ -12,8 +12,8 @@ void testInstance(problemInstance instance, testType type) {
 
     //must be even
     const float CROSSOVER_RATE = 0.8;
-    const float MUTATION_RATE = 0.5;
-    const int TOURNAMENT_SIZE = 5;
+    const float MUTATION_RATE = 0.4;
+    const int TOURNAMENT_SIZE = 8;
     const int NUMBER_OF_GENERATIONS = 25;
     const int NUMBER_OF_RUNS = 10;
     vector<bool> bestIndividual = {};
@@ -41,6 +41,7 @@ void testInstance(problemInstance instance, testType type) {
                     cout << "Best individual: ";
                     gen.printBistring(bestIndividual);
                     cout << "Best fitness: " << gen.getFitness(bestIndividual) << endl;
+                    cout << "Optimum: " << instance.optimum << endl;
                 }
 
             }
@@ -57,7 +58,7 @@ int main() {
 
     vector<fileType> fileVector {
             { "Instances/f1_l-d_kp_10_269", 295},
-           /* { "Instances/f2_l-d_kp_20_878", 1024},
+            { "Instances/f2_l-d_kp_20_878", 1024},
             { "Instances/f3_l-d_kp_4_20", 35},
             { "Instances/f4_l-d_kp_4_11", 23},
             { "Instances/f5_l-d_kp_15_375", 481.0694},
@@ -66,7 +67,7 @@ int main() {
             { "Instances/knapPI_1_100_1000_1", 9147},
             { "Instances/f8_l-d_kp_23_10000", 9767},
             { "Instances/f9_l-d_kp_5_80", 130},
-            { "Instances/f10_l-d_kp_20_879", 1025},*/
+            { "Instances/f10_l-d_kp_20_879", 1025},
     };
 
     vector<int> items;
