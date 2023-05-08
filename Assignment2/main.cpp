@@ -3,7 +3,6 @@
 #include <vector>
 #include "sharedTypes.h"
 #include "Genetic.h"
-#include "RouletteWheel.h"
 using namespace std;
 
 void testInstance(problemInstance instance, testType type) {
