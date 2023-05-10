@@ -10,7 +10,8 @@ struct Item {
 };
 
 enum testType {
-    GENETIC
+    GENETIC,
+    ACO
 };
 
 struct problemInstance {

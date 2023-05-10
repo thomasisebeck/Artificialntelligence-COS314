@@ -45,6 +45,12 @@ void testInstance(problemInstance instance, testType type) {
 
             }
 
+            break;
+
+        case ACO:
+
+            cout << "ACO: " << instance.name << endl;
+
     }
 }
 
