@@ -11,4 +11,4 @@ add_executable(COS314
         Assignment2/Knapsack.h
         Assignment2/Knapsack.cpp
         Assignment2/main.cpp
-        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h Assignment2/ACO.h)
+        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h Assignment2/ACO.h Assignment2/ACO.cpp)
