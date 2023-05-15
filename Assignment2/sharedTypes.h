@@ -5,13 +5,14 @@
 using namespace std;
 
 struct Item {
-    int weight;
-    int value;
+    float weight;
+    float value;
+    float pheremoneLevel;
 };
 
 enum testType {
     GENETIC,
-    ACO
+    ANT
 };
 
 struct problemInstance {

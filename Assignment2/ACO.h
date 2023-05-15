@@ -2,83 +2,60 @@
 #include "sharedTypes.h"
 #include <string>
 #include <algorithm>
-
-//all edges are connected!
-//only thing you have to account for is the pheremone level
-struct Edge {
-    float pheromoneLevel;
-};
+#include <iostream>
+using namespace std;
 
 class ACO {
     //2d array of items to connect
-    std::vector< std::vector<Edge> > edges;
     std::vector<Item> items;
     std::vector<int> indices;
+    float totalWeight;
+    float pheremonesToDeposit;
+    float bestValue;
+    string bestSolution;
+    int getNextItem(vector<int> visitedItems) {
+        vector<int> canVisit;
 
-    //eg: edge[0][1], is between item 0 and 1
-
-    ACO(int numberOfItems, std::vector<Item> items) {
-
-        Edge e;
-        e.pheromoneLevel = 1;
-
-        //initialise the vector (2d array of connections)
-        for (int i = 0; i < numberOfItems; i++)
-            for (int j = 0; j < numberOfItems; j++) {
-                edges[i][j] = e;
-            }
-
-        this->items = items;
-
+        //make a list of the unvisited items
         for (int i = 0; i < items.size(); i++)
-            indices.push_back(i);
+            if (std::find(visitedItems.begin(), visitedItems.end(), i) == visitedItems.end())
+                canVisit.push_back(i);
+
+        //get the sum of the pheremones on the items
+        float sumPheremones = 0;
+        for (int i : canVisit)
+            sumPheremones += items[i].pheremoneLevel;
+
+        //random number between 0 and pheremone level
+        float randomNumber = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/sumPheremones));
+
+
+        //subtract until you choose the next item
+        for (int i : canVisit) {
+            randomNumber -= items[i].pheremoneLevel;
+            if (randomNumber <= 0)
+                return i;
+        }
+
+        throw "Indices not calcuated correctly!";
+
+    }
+
+public:
+
+    ACO(std::vector<Item> items, float totalWeight, float pheremonesToDeposit) {
+        this->items = items;
+        this->totalWeight = totalWeight;
+        this->pheremonesToDeposit = pheremonesToDeposit;
+        this->bestValue = 0;
 
         srand (static_cast <unsigned> (time(0)));
+        bestSolution = "no solution found";
     }
 
-    int getItemIndex(Item i, std::vector<Item> items) {
-        int index = 0;
-        std::vector<Item>::iterator iter;
-        for (iter = items.begin(); iter != items.end(); iter++, index++)
-            if (iter->value == i.value && iter->weight == i.weight)
-                return index;
-        return -1;
+    string getBestSolution() {
+        return bestSolution;
     }
-
-    int getNextItemToVisit(Item i, vector<int> visitedItems) {
-        //get sum of pheromones on the edges
-        int index = getItemIndex(i, this->items);
-        vector<Edge> possibleEdges;
-
-        //get the sum of the pheromone levels and push the possible edges
-        int sum = 0;
-        for (Edge e : edges[index]) {
-            auto it = std::find(visitedItems.begin(), visitedItems.end(), index);
-            if (it == visitedItems.end()) { //not visited, possible to visit
-                sum += e.pheromoneLevel;
-                possibleEdges.push_back(e);
-            }
-        }
-
-        //random number from 0 to sum
-        float randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/sum);
-
-        //subtract until you choose the edge
-        for (Edge e: possibleEdges) {
-            randomNumber -= e.pheromoneLevel;
-            if (randomNumber <= 0)
-                return e;
-        }
-
-        throw "Could not find edge!";
-    }
-
-    int getEdgeIndex(Edge e) {
-        std::vector< std::vector<Edge> >::iterator iter;
-        for (int i = 0; i < edges.size(); i++)
-            if (i == )
-    }
-
 
     void travelRoute() {
         //get a random starting point
@@ -86,13 +63,49 @@ class ACO {
         vector<int> visitedItems;
         visitedItems.push_back(itemStart);
 
+        float totWeight = items[itemStart].weight;
+        float totValue = items[itemStart].value;
+
         //travel the route and keep track of visited items
+        while (visitedItems.size() != items.size()) {
+            int nextItemIndex = getNextItem(visitedItems);
+
+            totWeight += items[nextItemIndex].weight;
+            if (totWeight > totalWeight)
+                break;
+
+            totValue += items[nextItemIndex].value;
+
+            //valid to visit, does not exceed weight
+            visitedItems.push_back(nextItemIndex);
+        }
+
+        float currValue = 0;
+        //get the value
+        for (int i = 0; i < visitedItems.size(); i++)
+            currValue += items[visitedItems[i]].value;
+
+        if (currValue > bestValue) { //store this instance
+            bestValue = currValue;
+            bestSolution = "";
+            for (int i = 0; i < items.size(); i++)
+                bestSolution += "0";
+
+            for (int i: visitedItems)
+                bestSolution[i] = '1';
 
 
-        //if the route is valid, deposit on
+        }
 
+        //deposit pheromones proportional to value
+        for (int i : visitedItems)
+            items[i].pheremoneLevel += pheremonesToDeposit * totValue;
 
     }
 
-
+    void printItems() {
+        for (Item i : items)
+            cout << i.pheremoneLevel << " ";
+        cout << endl;
+    }
 };

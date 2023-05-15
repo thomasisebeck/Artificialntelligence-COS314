@@ -3,6 +3,8 @@
 #include <vector>
 #include "sharedTypes.h"
 #include "Genetic.h"
+#include "ACO.h"
+
 using namespace std;
 
 void testInstance(problemInstance instance, testType type) {
@@ -16,6 +18,10 @@ void testInstance(problemInstance instance, testType type) {
     const int NUMBER_OF_GENERATIONS = 25;
     const int NUMBER_OF_RUNS = 10;
     vector<bool> bestIndividual = {};
+
+    const int NUMBER_OF_ANT_TRAILS = 20;
+
+    const float PHEROMONES_TO_DEPOSIT = 0.05;
 
     switch (type) {
         case GENETIC:
@@ -47,9 +53,16 @@ void testInstance(problemInstance instance, testType type) {
 
             break;
 
-        case ACO:
+        case ANT:
 
             cout << "ACO: " << instance.name << endl;
+
+            ACO aco(instance.items, instance.capacity, PHEROMONES_TO_DEPOSIT);
+
+            for (int j = 0; j < NUMBER_OF_ANT_TRAILS; j++)
+                aco.travelRoute();
+
+            cout << aco.getBestSolution() << endl;
 
     }
 }
@@ -104,12 +117,14 @@ int main() {
             newItem.value = stoi(line.substr(0, line.find(' ')));
             line.erase(0, line.find(' ') + 1);
             newItem.weight = stoi(line);
+            newItem.pheremoneLevel = 1;
             instance.items.push_back(newItem);
         }
 
         myFile.close();
 
         //test
+        testInstance(instance, ANT);
         testInstance(instance, GENETIC);
 
     }
