@@ -3,6 +3,8 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 using namespace std;
 
 class ACO {
@@ -13,6 +15,7 @@ class ACO {
     float pheremonesToDeposit;
     float bestValue;
     string bestSolution;
+
     int getNextItem(vector<int> visitedItems) {
         vector<int> canVisit;
 
@@ -52,6 +55,11 @@ public:
         srand (static_cast <unsigned> (time(0)));
         bestSolution = "no solution found";
     }
+
+    float getValue() {
+        return bestValue;
+    }
+
 
     string getBestSolution() {
         return bestSolution;
@@ -94,7 +102,10 @@ public:
             for (int i: visitedItems)
                 bestSolution[i] = '1';
 
+            stringstream strm;
+            strm << std::fixed << std::setprecision(0) << bestValue;
 
+            bestSolution += "(" + strm.str() + ")";
         }
 
         //deposit pheromones proportional to value
@@ -107,5 +118,9 @@ public:
         for (Item i : items)
             cout << i.pheremoneLevel << " ";
         cout << endl;
+    }
+
+    float getBestFitness() {
+        return bestValue;
     }
 };

@@ -15,54 +15,81 @@ void testInstance(problemInstance instance, testType type) {
     const float CROSSOVER_RATE = 0.8;
     const float MUTATION_RATE = 0.4;
     const int TOURNAMENT_SIZE = 8;
-    const int NUMBER_OF_GENERATIONS = 25;
-    const int NUMBER_OF_RUNS = 10;
+    const int NUMBER_OF_GENERATIONS = 15;
+    const int NUMBER_OF_RUNS_GENETIC = 10;
     vector<bool> bestIndividual = {};
 
-    const int NUMBER_OF_ANT_TRAILS = 20;
-
+    const int NUMBER_OF_ANT_TRAILS = 200;
     const float PHEROMONES_TO_DEPOSIT = 0.05;
+    const int NUMBER_OF_RUNS_ACO = 60;
 
     switch (type) {
         case GENETIC:
 
-            cout << "Genetic: " << instance.name << endl;
+            try {
 
-            for (int i = 0; i < NUMBER_OF_RUNS; i++) {
+                cout << "Genetic: " << instance.name << endl;
 
-                //create a genetic class
-                Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,
-                            CROSSOVER_RATE, MUTATION_RATE, TOURNAMENT_SIZE);
+                for (int i = 0; i < NUMBER_OF_RUNS_GENETIC; i++) {
 
-                for (int i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-                    gen.crossOver();
-                    gen.tournamentSelection();
-                    gen.mutate();
-                    if (bestIndividual.empty() || gen.getFitness(bestIndividual) < gen.getFitness(gen.getBest()))
-                        bestIndividual = gen.getBest();
+                    //create a genetic class
+                    Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,
+                                CROSSOVER_RATE, MUTATION_RATE, TOURNAMENT_SIZE);
+
+                    for (int i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+                        gen.crossOver();
+                        gen.tournamentSelection();
+                        gen.mutate();
+                        if (bestIndividual.empty() || gen.getFitness(bestIndividual) < gen.getFitness(gen.getBest()))
+                            bestIndividual = gen.getBest();
+                    }
+
+                    if (i == NUMBER_OF_RUNS_GENETIC - 1) {
+                        cout << "Best individual: ";
+                        gen.printBistring(bestIndividual);
+                        cout << "Best fitness: " << gen.getFitness(bestIndividual) << endl;
+                        cout << "Optimum: " << instance.optimum << endl;
+                    }
+
                 }
 
-                if (i == NUMBER_OF_RUNS - 1) {
-                    cout << "Best individual: ";
-                    gen.printBistring(bestIndividual);
-                    cout << "Best fitness: " << gen.getFitness(bestIndividual) << endl;
-                    cout << "Optimum: " << instance.optimum << endl;
-                }
-
+            }
+            catch (const char* err) {
+                cout << "ERROR: " << err << endl;
             }
 
             break;
 
         case ANT:
 
-            cout << "ACO: " << instance.name << endl;
+            try {
 
-            ACO aco(instance.items, instance.capacity, PHEROMONES_TO_DEPOSIT);
+                float bestValue = 0;
+                string bestSolution;
 
-            for (int j = 0; j < NUMBER_OF_ANT_TRAILS; j++)
-                aco.travelRoute();
+                cout << "ACO: " << instance.name << endl;
 
-            cout << aco.getBestSolution() << endl;
+                for (int i = 0; i < NUMBER_OF_RUNS_ACO; i++) {
+
+                    ACO aco(instance.items, instance.capacity, PHEROMONES_TO_DEPOSIT);
+
+                    for (int j = 0; j < NUMBER_OF_ANT_TRAILS; j++)
+                        aco.travelRoute();
+
+                    if (aco.getValue() > bestValue) {
+                        bestSolution = aco.getBestSolution();
+                        bestValue = aco.getBestFitness();
+                    }
+                }
+
+                cout << "Best individual: " << bestSolution << endl;
+                cout << "Best fitness: " << bestValue << endl;
+                cout << "Optimum: " << instance.optimum << endl;
+
+            }
+            catch (const char * err) {
+                cout << "ERROR: " << err << endl;
+            }
 
     }
 }
