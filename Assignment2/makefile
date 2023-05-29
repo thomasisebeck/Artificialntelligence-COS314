@@ -2,10 +2,10 @@ main:
 	g++ -c -g *.cpp
 	g++ -o main *.o
 
-r: main
+run: main
 	./main
 
-c:
+clean:
 	rm *.o main
 
 val:

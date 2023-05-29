@@ -13,12 +13,12 @@ class ACO {
     std::vector<int> indices;
     float totalWeight;
     float pheromonesToDeposit;
+    float evaporationRate;
     float bestValue;
     string bestSolution;
     int getNextItem(vector<int> visitedItems);
 public:
-
-    ACO(std::vector<Item> items, float totalWeight, float pheremonesToDeposit);
+    ACO(std::vector<Item> items, float totalWeight, float pheremonesToDeposit, float evaporationRate);
     float getValue();
     string getBestSolution();
     void travelRoute();

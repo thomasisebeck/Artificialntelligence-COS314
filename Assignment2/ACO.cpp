@@ -3,11 +3,12 @@
 #include <vector>
 using namespace std;
 
-ACO::ACO(std::vector<Item> items, float totalWeight, float pheremonesToDeposit) {
+ACO::ACO(std::vector<Item> items, float totalWeight, float pheremonesToDeposit, float evaporationRate) {
     this->items = items;
     this->totalWeight = totalWeight;
     this->pheromonesToDeposit = pheremonesToDeposit;
     this->bestValue = 0;
+    this->evaporationRate = evaporationRate;
 
     srand (static_cast <unsigned> (time(0)));
     bestSolution = "no solution found";
@@ -37,7 +38,7 @@ int ACO::getNextItem(vector<int> visitedItems) {
             return i;
     }
 
-    throw "Indices not calcuated correctly!";
+    return canVisit[canVisit.size() - 1];
 
 }
 
@@ -92,9 +93,13 @@ void ACO::travelRoute() {
         bestSolution += "(" + strm.str() + ")";
     }
 
-    //deposit pheromones proportional to value
+    //evaporate the previous pheremones
+    for (Item i : this->items)
+        i.pheremoneLevel -= evaporationRate;
+
+    //deposit pheromones proportional to items profit (value/weight)
     for (int i : visitedItems)
-        items[i].pheremoneLevel += pheromonesToDeposit * totValue;
+        items[i].pheremoneLevel += pheromonesToDeposit * (static_cast<float>(items[i].value)/items[i].weight);
 }
 
 float ACO::getBestFitness() {
