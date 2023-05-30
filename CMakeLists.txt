@@ -7,5 +7,6 @@ include_directories(Assignment3)
 
 add_executable(COS314New
         Assignment3/main.cpp
+        Assignment3/Network.h
         Assignment3/Network.cpp
-        Assignment3/Network.h Assignment3/Neuron.h Assignment3/Neuron.cpp)
+        )

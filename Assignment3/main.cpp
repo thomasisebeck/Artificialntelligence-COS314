@@ -5,16 +5,15 @@ using namespace std;
 
 int main() {
 
-    //if we send in { 3, 2, 1 }
-    //it is number of layers in input, hidden, output
+    Network n({2, 3, 2});
+    n.setTargetVals({2, 3});
+    n.setInputVals({1, 2});
 
-    vector<int> topology;
-    topology.push_back(3); //3 input layers
-    topology.push_back(2); //2 hidden layers
-    topology.push_back(1); //1 output layers
-    Network myNet(topology);
-
-    myNet.print();
+    try {
+        n.feedForward();
+    } catch (const char* msg) {
+        cout << msg << endl;
+    }
 
     return 0;
 }
