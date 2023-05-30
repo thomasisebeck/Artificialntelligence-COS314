@@ -14,14 +14,7 @@ int main() {
     topology.push_back(1); //1 output layers
     Network myNet(topology);
 
-    vector<double> inputVals;
-    myNet.feedForward(inputVals);
-
-    vector<double> targetVals;
-    myNet.backProp(targetVals);
-
-    vector<double> resultVals;
-    myNet.getResults(resultVals);
+    myNet.print();
 
     return 0;
 }
