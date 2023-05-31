@@ -15,31 +15,37 @@ ConnectionRow::ConnectionRow(int rows, int cols, string layer) {
         connections.push_back(row);
     }
     this->layer = layer;
-    this->bias = 1;
-    for (int i = 0; i < cols; i++) {
-        Connection c {
-                "b" + to_string(i),
-                1
-        };
-        this->biasConnections.push_back(c);
-    }
+
+    Connection c{
+            "b_" + layer,
+            1
+    };
+
+    this->biasConnection = c;
+
 }
 
 
 
 void ConnectionRow::printConnections() {
+    cout << "trying to print..." << endl;
     cout << "Connections for layer " << layer << endl;
     vector<vector<Connection>>::iterator outerIter;
     vector<Connection>::iterator innerIter;
-    for (outerIter = connections.begin(); outerIter != connections.end(); outerIter++) {
-        cout << "[";
-        for (innerIter = (*outerIter).begin(); innerIter != (*outerIter).end(); innerIter++) {
-            cout << innerIter->id << " w" << innerIter->weight;
-            if (innerIter != (*outerIter).end() - 1)
-                cout << ", ";
+
+    if (!connections.empty())
+        for (outerIter = connections.begin(); outerIter != connections.end(); outerIter++) {
+            cout << "[";
+            for (innerIter = (*outerIter).begin(); innerIter != (*outerIter).end(); innerIter++) {
+                cout << innerIter->id << " w" << innerIter->weight;
+                if (innerIter != (*outerIter).end() - 1)
+                    cout << ", ";
+            }
+            cout << "]" << endl;
         }
-        cout << "]" << endl;
-    }
+    cout << "Bias value: ";
+    cout << this->biasConnection.weight << endl;
+    cout << endl;
 }
 
 double ConnectionRow::getWeight(int row, int col) {
@@ -47,6 +53,10 @@ double ConnectionRow::getWeight(int row, int col) {
 }
 std::string ConnectionRow::getId(int row, int col) {
     return connections[row][col].id;
+}
+
+Connection &ConnectionRow::getBiasConnection() {
+    return this->biasConnection;
 }
 
 Network::Network(vector<int> topology) {
@@ -91,7 +101,6 @@ void Network::print() {
         cout << endl;
 
         if (i != neurons.size() - 1)
-            //print connection from i to i + 1
             connections[i].printConnections();
     }
 
@@ -130,6 +139,7 @@ void Network::feedForward() {
                 value += connections[layerNumber - 1].getWeight(neuronFrom, neuronTo) *
                          neurons[layerNumber - 1][neuronFrom];
             }
+            value += connections[layerNumber - 1].getBiasConnection().weight;
             neurons[layerNumber][neuronTo] = ReLu(value);
         }
     }

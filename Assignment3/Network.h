@@ -10,13 +10,13 @@ class ConnectionRow {
 private:
     std::vector<std::vector<Connection>> connections;
     std::string layer;
-    std::vector<Connection> biasConnections;
-    double bias;
+    Connection biasConnection;
 public:
     ConnectionRow(int rows, int cols, std::string layer);
     void printConnections();
     double getWeight(int row, int col);
     std::string getId(int row, int col);
+    Connection & getBiasConnection();
 };
 
 class Network {
