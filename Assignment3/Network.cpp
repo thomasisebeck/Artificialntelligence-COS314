@@ -80,12 +80,12 @@ vector<Connection>& ConnectionRow::getBiasConnections() {
     return this->biasConnections;
 }
 
-Network::Network(vector<int> topology, double alpha) : alpha(alpha) {
+Network::Network(vector<int> topology, double alpha) : oldWeights(0,0,"empty") {
     //create the neurons
     for (int i : topology) {
         vector<Neuron> neuronCol;
         for (int j = 0; j < i; j++)
-            neuronCol.push_back({0.5, 0});
+            neuronCol.push_back({0.5, 0, 0});
         neurons.push_back(neuronCol);
     }
 
@@ -98,6 +98,8 @@ Network::Network(vector<int> topology, double alpha) : alpha(alpha) {
 
         connections.emplace_back(rows, cols, layerName);
     }
+
+    this->alpha = alpha;
 
 }
 
@@ -117,7 +119,7 @@ void Network::print() {
     for (int i = 0; i < neurons.size(); i++) {
         cout << "Row : " << i + 1 << endl;
         for (int j = 0; j < neurons[i].size(); j++)
-            cout << "fn(" << neurons[i][j].fn << "), deriv(" << neurons[i][j].derivative << ") ";
+            cout << "fn(" << neurons[i][j].fn << "), deriv(" << neurons[i][j].derivative << "), err(" << neurons[i][j].errorTerm << ") ";
         cout << endl;
 
         if (i != neurons.size() - 1)
@@ -148,13 +150,13 @@ void Network::printConnectionsAt(int index) {
 Neuron ReLu(double x) {
     double function = x >= 0 ? x : 0;
     double deriv = x >= 0 ? 1 : 0;
-    return { function , deriv };
+    return { function , deriv, x };
 }
 
 Neuron sigmoid(double x) {
     double function = static_cast<double>(1) / (1 + exp(-x));
     double deriv = function * (1 - function);
-    return { function, deriv };
+    return { function, deriv, x };
 }
 
 double calculateError(vector<double> targets, vector<double> outputs) {
@@ -185,7 +187,7 @@ ConnectionRow Network::getWeightsCopy(int index) {
     //------------------------ copy the output weights ---------------------//
 
     ConnectionRow oldOuputWeights(connections[index].getNumRows(),
-                                  connections[index].getNumCols(), "outputOld");
+                                  connections[index].getNumCols(), "weights copy");
     for (int row = 0; row < connections[index].getNumRows(); row++)
         for (int col = 0; col < connections[index].getNumCols(); col++)
             oldOuputWeights.setWeight(row, col, connections[index].getWeight(row, col));
@@ -195,68 +197,23 @@ ConnectionRow Network::getWeightsCopy(int index) {
     return oldOuputWeights;
 }
 
-void Network::correctHiddenToOutputWeights() {
-    //copy the output weights
-    ConnectionRow oldOuputWeights = getWeightsCopy(connections.size() - 1);
+void Network::storeErrorTerms() {
+    //store in the last nodes, then propagate backwards
 
-    //hidden to output error correction
-    vector<Neuron> outputNeurons = neurons[neurons.size() - 1];
-    const int OUTPUT_ROWS = connections[connections.size() - 1].getNumRows();
-    const int OUTPUT_COLS = connections[connections.size() - 1].getNumCols();
-
-    vector<double> outputErrors;
-    vector<double> outputFns;
-    for (int row = 0; row < OUTPUT_ROWS; row++)
-        for (int col = 0; col < OUTPUT_COLS; col++) {
-            double currentTarget = targetVals[col];
-            double outputFn = neurons[neurons.size() - 1][col].fn;
-            double outputDeriv = neurons[neurons.size() - 1][col].derivative;
-
-            outputErrors.push_back(outputFn * outputDeriv * (currentTarget - outputFn));
-            outputFns.push_back(outputFn);
-        }
-
-    int currErr = 0;
-    //update output weights using the errors
-    for (int row = 0; row < OUTPUT_ROWS; row++)
-        for (int col = 0; col < OUTPUT_COLS; col++) {
-            double oldWeight = connections[connections.size() - 1].getWeight(row, col);
-            double newWeight = oldWeight + outputErrors[currErr];
-            connections[connections.size() - 1].setWeight(row, col, newWeight);
-            currErr++;
-        }
+    for (int i = 0; i < targetVals.size(); i++) {
+        //difference = target - fn
+        double fn = neurons[neurons.size() - 1][i].fn;
+        double difference = targetVals[i] - fn;
+        neurons[neurons.size() - 1][i].errorTerm = fn * (1 - fn) * (difference);
+    }
 }
-
 void Network::backPropagate() {
 
-    correctHiddenToOutputWeights();
+    storeErrorTerms(); //error terms are now in the last nodes
 
+    cout << "error correction terms stored... " << endl;
+    print();
 
-    /*
-
-    //-------------------------------- HIDDEN LAYERS ------------------------------//
-
-    for (int layerNumber = connections.size() - 2; layerNumber >= 0; layerNumber--) {
-        cout << "CORRECTING ON LAYER: " << layerNumber << endl;
-
-        //sum backwards from the output that we got, to the previous layer
-        vector<double> backwardsPropagatedInputs;
-
-        for (int prevLayerNeuron = 0; prevLayerNeuron < neurons[layerNumber].size(); prevLayerNeuron++) {
-            double currSum = 0;
-            for (int nextLayerNeuron = 0; nextLayerNeuron < neurons[layerNumber + 1].size(); nextLayerNeuron++) {
-                currSum += neurons[layerNumber + 1][nextLayerNeuron].fn *
-                           oldOuputWeights.getWeight(nextLayerNeuron, prevLayerNeuron);
-                double currFn = neurons[layerNumber][prevLayerNeuron].fn;
-                double oldOutputWeight = oldOuputWeights.getWeight(prevLayerNeuron, nextLayerNeuron)
-                        * errorInformationTermsPrev[nextLayerNeuron];
-                currSum += (currFn) * (1 - currFn) * oldOutputWeight;
-            }
-            cout << "Summed outputs from output neurons to neuron " << prevLayerNeuron << " in prev layer: " << currSum << endl;
-
-
-        }
-    }*/
 
 }
 

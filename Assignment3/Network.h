@@ -27,6 +27,7 @@ public:
 struct Neuron {
     double fn;
     double derivative;
+    double errorTerm;
 };
 
 class Network {
@@ -39,7 +40,8 @@ private:
     double alpha;
     void printConnectionsAt(int index);
     ConnectionRow getWeightsCopy(int index);
-    void correctHiddenToOutputWeights();
+    void storeErrorTerms();
+    ConnectionRow oldWeights;
 public:
     Network(std::vector<int> topology, double alpha);
     void setInputVals(std::vector<double> inputVals);
