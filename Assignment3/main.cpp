@@ -5,12 +5,13 @@ using namespace std;
 
 int main() {
 
-    Network n({2, 3, 2});
+    Network n({2, 3, 2}, 1);
     n.setTargetVals({2, 3});
-    n.setInputVals({1, 2});
+    n.setInputVals({3, 4});
 
     try {
         n.feedForward();
+        n.backPropagate();
     } catch (const char* msg) {
         cout << msg << endl;
     }
