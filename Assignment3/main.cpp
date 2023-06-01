@@ -7,7 +7,7 @@ int main() {
 
     Network n({2, 3, 2}, 1);
     n.setTargetVals({2, 3});
-    n.setInputVals({3, 4});
+    n.setInputVals({1, 2});
 
     try {
         n.feedForward();

@@ -209,10 +209,42 @@ void Network::storeErrorTerms() {
 }
 void Network::backPropagate() {
 
+    cout << "backpropagating..." << endl;
+
     storeErrorTerms(); //error terms are now in the last nodes
 
-    cout << "error correction terms stored... " << endl;
     print();
+
+    //now backpropagate these error correction terms using the existing weights
+    for (int layerNumber = neurons.size() - 2; layerNumber >= 0; layerNumber--) {
+        cout << "Backprop to layer " << layerNumber << endl;
+
+        //store the error terms in each of the nodes
+        //it's the sum of the error correction terms from the output * weights
+
+        //bias CorrTerm = learning rate * errorTermForThatNode
+
+        //loop through the previous layer nodes
+        //delta = f(n) * (1 - f(n)) * sum(weight_to_next_node * errorTermOfNextNodes)
+        for (int currNeuron = 0; currNeuron < neurons[layerNumber].size(); currNeuron++) {
+            double sumOfWeightsAndErrorTerms = 0;
+
+            for (int nextNeuron = 0; nextNeuron < neurons[layerNumber + 1].size(); nextNeuron++) { //cols = nuerons in next, rows = neurons in prev
+                //add: errCorrNext * weightToCurr
+                sumOfWeightsAndErrorTerms += neurons[layerNumber + 1][nextNeuron].errorTerm *
+                                             connections[layerNumber].getWeight(currNeuron, nextNeuron);
+                cout << "adding: " << neurons[layerNumber + 1][nextNeuron].errorTerm *
+                                      connections[layerNumber].getWeight(currNeuron, nextNeuron)
+                                      << " for current neuron " << currNeuron << endl;
+            }
+
+            //set the current neuron's error term to the sum
+            neurons[layerNumber][currNeuron].errorTerm = sumOfWeightsAndErrorTerms;
+
+        }
+
+    }
+
 
 
 }
@@ -244,5 +276,4 @@ void Network::feedForward() {
                 neurons[layerNumber][neuronTo] = ReLu(value);
         }
 
-    this->print();
 }

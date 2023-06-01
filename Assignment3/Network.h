@@ -34,6 +34,7 @@ class Network {
 private:
     //2D vector
     std::vector<std::vector<Neuron>> neurons;
+    std::vector<double> currBiasErrorTerms;
     std::vector<double> targetVals;
     std::vector<double> inputVals;
     std::vector<ConnectionRow> connections;
