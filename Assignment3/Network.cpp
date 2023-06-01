@@ -170,8 +170,6 @@ void Network::backPropagateErrors() {
 
     //now backpropagate these error correction terms using the existing weights
     for (int layerNumber = neurons.size() - 2; layerNumber >= 0; layerNumber--) {
-        cout << "Backprop to layer " << layerNumber << endl;
-
         //store the error terms in each of the nodes
         //it's the sum of the error correction terms from the output * weights
 
@@ -190,7 +188,7 @@ void Network::backPropagateErrors() {
                 sumOfOnlyErrorTerms += neurons[layerNumber + 1][nextNeuron].errorTerm;
             }
 
-            cout << "setting layer " << layerNumber << " neuron " << currNeuron << " error to " << sumOfWeightsAndErrorTerms << endl;
+            //cout << "setting layer " << layerNumber << " neuron " << currNeuron << " error to " << sumOfWeightsAndErrorTerms << endl;
             //set the current neuron's error term to the sum
             neurons[layerNumber][currNeuron].errorTerm = sumOfWeightsAndErrorTerms;
             neurons[layerNumber][currNeuron].biasErrorTerm = sumOfOnlyErrorTerms;
@@ -203,7 +201,7 @@ void Network::backPropagateErrors() {
 void Network::correctWeights() {
     //loop back from the second last layer
     for (int i = neurons.size() - 2; i >= 0; i--) {
-        cout << "correct weights from layer " << i << " to layer " << i + 1 << endl;
+        //cout << "correct weights from layer " << i << " to layer " << i + 1 << endl;
 
         //loop through the weights
         for (int col = 0; col < connections[i].getNumCols(); col++)
@@ -224,7 +222,7 @@ void Network::correctWeights() {
                 connections[i].setWeight(row, col, prevWeight + deltaWeight);
 
                 //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
-                connections[i].getBiasWeights()[row] += deltaWeight; //not times input
+                connections[i].getBiasWeights()[col] += deltaWeight; //not times input
             }
     }
 
@@ -232,18 +230,14 @@ void Network::correctWeights() {
 
 void Network::backPropagate() {
 
-    cout << "input vals: " << endl;
-    for (double val : inputVals)
-        cout << val << " ";
-    cout << endl;
 
-    cout << "backpropagating..." << endl;
+    //cout << "backpropagating..." << endl;
 
     storeErrorTerms(); //error terms are now in the last nodes
     backPropagateErrors(); //all the error correction terms are set for each node
     correctWeights();
 
-    print();
+   // print();
 
 }
 

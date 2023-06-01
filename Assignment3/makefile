@@ -9,4 +9,4 @@ c:
 	rm *.o main
 
 val:
-	valgrind --leak-check=full ./main
+	valgrind --leak-check=full -s ./main

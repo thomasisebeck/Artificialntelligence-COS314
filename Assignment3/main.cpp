@@ -265,10 +265,40 @@ int main() {
         cout << d.positive << endl;
     }
 
-    //you need 8 input nodes and 1 output node
+    try {
+        //you need 8 input nodes and 1 output node
+
+        vector<int> topology = {8, 10, 1};
+        Network n(topology, 0.8);
+
+        for (dataInstace d: instances) {
+            vector<double> inputVals = {
+                    d.age,
+                    d.maturity,
+                    d.maturedBy,
+                    d.weeks,
+                    d.isMalig,
+                    d.size,
+                    d.side,
+                    d.specificSide
+            };
+            vector<double> targetVals = { d.isMalig };
+
+            n.setInputVals(inputVals);
+            n.setTargetVals(targetVals);
+            n.feedForward();
+            n.backPropagate();
+        }
+
+    } catch (const char * msg) {
+        cout << msg << endl;
+    }
+
+    cout << "----------------- testing network ---------------------" << endl;
 
 
 
+    cout << "-------------------------------------------------------" << endl;
 
     return 0;
 }
