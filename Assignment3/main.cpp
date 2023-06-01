@@ -19,24 +19,66 @@ struct dataInstace {
     double positive;
 };
 
+void shuffle(vector<dataInstace>& array) {
+    for (int i = 0; i < array.size(); i++) {
+        int index1 = rand() % array.size();
+        int index2 = rand() % array.size();
+        dataInstace temp = array[index1];
+        array[index1] = array[index2];
+        array[index2] = temp;
+    }
+}
+
 int main() {
 
-    /*Network n({2, 3, 2}, 0.5);
-    n.setTargetVals({0.1, 0.4});
-    n.setInputVals({5, 1});
+    Network n({2, 3, 1}, 0.5);
+
+    n.setTargetVals({0});
+    n.setInputVals({1, 0});
+    cout << "target and input vals set: " << endl;
 
     try {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
+
+            n.feedForward();
+            cout << "after feed-fwd on iter " << i << endl;
+            n.print();
+
+            n.backPropagate();
+            cout << "after backprop on iter " << i << endl;
+            n.print();
+
+            cout << "after iter: " << i << endl;
+            n.print();
+
+            vector<double> vect = n.getOutputValues();
+            cout << "should be 0: " << vect[0] << endl;
+
+            n.setTargetVals({1});
+            n.setInputVals({0, 1});
             n.feedForward();
             n.backPropagate();
+
+            n.print();
+            vect = n.getOutputValues();
+            cout << "should be 1: " << vect[0] << endl;
+
         }
+
+        n.setTargetVals({1});
+        n.setInputVals({0, 1});
         n.testNetwork();
+
+        n.setTargetVals({0});
+        n.setInputVals({1, 0});
+        n.testNetwork();
+
+
     } catch (const char* msg) {
         cout << msg << endl;
-    }*/
+    }
 
-    //get the number of unique instances for each attribute
-
+    /*
     ifstream myFile;
     myFile.open("data.txt");
 
@@ -241,17 +283,7 @@ int main() {
         cout << err << endl;
     }
 
-    /*
-        double age;
-        double maturity;
-        double maturedBy;
-        double weeks;
-        double isMalig;
-        double size;
-        double side;
-        double specificSide;
-        double positive;
-    */
+    shuffle(instances);
 
     for (dataInstace d: instances) {
         cout << d.age << " ";
@@ -268,8 +300,8 @@ int main() {
     try {
         //you need 8 input nodes and 1 output node
 
-        vector<int> topology = {8, 10, 1};
-        Network n(topology, 0.8);
+        vector<int> topology = {7, 5, 10, 1};
+        Network n(topology, 0.05);
 
         for (dataInstace d: instances) {
             vector<double> inputVals = {
@@ -277,7 +309,6 @@ int main() {
                     d.maturity,
                     d.maturedBy,
                     d.weeks,
-                    d.isMalig,
                     d.size,
                     d.side,
                     d.specificSide
@@ -287,18 +318,37 @@ int main() {
             n.setInputVals(inputVals);
             n.setTargetVals(targetVals);
             n.feedForward();
+
+            cout << "trying to get : " << d.isMalig << endl;
+            cout << "got: " << n.getOutputValues()[0] << endl;
+
             n.backPropagate();
         }
 
+        cout << "----------------- testing network ---------------------" << endl;
+
+        for (dataInstace d: instances) {
+            vector<double> inputVals = {
+                    d.age,
+                    d.maturity,
+                    d.maturedBy,
+                    d.weeks,
+                    d.size,
+                    d.side,
+                    d.specificSide
+            };
+
+            n.setInputVals(inputVals);
+            n.feedForward();
+            cout << "got: " << n.getOutputValues()[0] << "(" << d.isMalig << ")" << endl;
+
+        }
+
+        cout << "-------------------------------------------------------" << endl;
+
     } catch (const char * msg) {
         cout << msg << endl;
-    }
-
-    cout << "----------------- testing network ---------------------" << endl;
-
-
-
-    cout << "-------------------------------------------------------" << endl;
+    }*/
 
     return 0;
 }

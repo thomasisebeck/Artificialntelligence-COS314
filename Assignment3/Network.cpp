@@ -9,7 +9,7 @@ ConnectionRow::ConnectionRow(int rows, int cols, string layer) {
         for (int j = 0; j < cols; j++) {
             Connection c {
                     "r" + to_string(i) + "c" + to_string(j),
-                    static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/0.05)) + 0.005
+                    0.5
             };
             row.push_back(c);
         }
@@ -80,7 +80,7 @@ Network::Network(vector<int> topology, double alpha) : oldWeights(0,0,"empty") {
     for (int i : topology) {
         vector<Neuron> neuronCol;
         for (int j = 0; j < i; j++)
-            neuronCol.push_back({0.5, 0, 0});
+            neuronCol.push_back({0, 0, 0});
         neurons.push_back(neuronCol);
     }
 
@@ -112,7 +112,7 @@ void Network::print() {
     //print neuron col, then connections...
 
     for (int i = 0; i < neurons.size(); i++) {
-        cout << "Row : " << i + 1 << endl;
+        cout << "Row : " << i << endl;
         for (int j = 0; j < neurons[i].size(); j++)
             cout << "fn(" << neurons[i][j].fn << "), deriv(" << neurons[i][j].derivative << "), err(" << neurons[i][j].errorTerm << ") ";
         cout << endl;
@@ -121,6 +121,13 @@ void Network::print() {
             connections[i].printConnections();
     }
 
+}
+
+int Network::getIsMalig() {
+    //see what value is stored on the output layer!
+    if (neurons[0][neurons.size() - 1].fn > 0.5)
+        return 1;
+    return 0;
 }
 
 void Network::printConnectionsAt(int index) {
@@ -157,12 +164,21 @@ Neuron sigmoid(double x) {
 void Network::storeErrorTerms() {
     //store in the last nodes, then propagate backwards
 
+    const int OUT_LAYER_IND = neurons.size() - 1;
+
     for (int i = 0; i < targetVals.size(); i++) {
         //difference = target - fn
-        double fn = neurons[neurons.size() - 1][i].fn;
-        double difference = targetVals[i] - fn;
-        neurons[neurons.size() - 1][i].errorTerm = fn * (1 - fn) * (difference);
-        neurons[neurons.size() - 1][i].biasErrorTerm = alpha * neurons[neurons.size() - 1][i].errorTerm;
+        double fn = neurons[OUT_LAYER_IND][i].fn;
+        double t = targetVals[i];
+
+        // (target - fn)(f'n)
+        // f'n = (1 - fn)
+        neurons[OUT_LAYER_IND][i].errorTerm = (t - fn) * (fn * (1 - fn));
+
+        cout << "err out node " << i << ": " << neurons[OUT_LAYER_IND][i].errorTerm << endl;
+
+        neurons[OUT_LAYER_IND][i].biasErrorTerm =
+                alpha * neurons[OUT_LAYER_IND][i].errorTerm;
     }
 }
 
@@ -230,10 +246,13 @@ void Network::correctWeights() {
 
 void Network::backPropagate() {
 
-
     //cout << "backpropagating..." << endl;
 
     storeErrorTerms(); //error terms are now in the last nodes
+
+    cout << "after storing error terms: " << endl;
+    this->print();
+
     backPropagateErrors(); //all the error correction terms are set for each node
     correctWeights();
 
@@ -248,8 +267,11 @@ void Network::feedForward() {
         throw "Input vals is empty";
 
     //set the values in the first neurons
-    for (int i = 0; i < neurons[0].size(); i++)
-        neurons[0][i] = sigmoid(inputVals[i]);
+    for (int i = 0; i < neurons[0].size(); i++) {
+        cout << "setting input val " << i << " to " << inputVals[i] << endl;
+        neurons[0][i].fn = inputVals[i]; //first layer has no activation function
+        neurons[0][i].derivative = 0;
+    }
 
     for (int layerNumber = 1; layerNumber < neurons.size(); layerNumber++)
         for (int neuronTo= 0; neuronTo < neurons[layerNumber].size(); neuronTo++) {
@@ -259,9 +281,15 @@ void Network::feedForward() {
                          neurons[layerNumber - 1][neuronFrom].fn;
             }
 
-            value += connections[layerNumber - 1].getBiasWeights()[neuronTo];
+            value *= connections[layerNumber - 1].getBiasWeights()[neuronTo];
 
-            neurons[layerNumber][neuronTo] = sigmoid(value);
+            if (layerNumber == neurons.size() - 1) {
+                neurons[layerNumber][neuronTo] = sigmoid(value);
+                cout << "stored fn: " << sigmoid(value).fn << " for input " << value << endl;
+                cout << "stored deriv: " << sigmoid(value).derivative << " for input " << value << endl;
+            }
+            else
+                neurons[layerNumber][neuronTo] = ReLu(value);
         }
 
 }
@@ -289,4 +317,13 @@ void Network::testNetwork() {
     cout << endl;
 
     cout << "========================================================" << endl;
+}
+
+std::vector<double> Network::getOutputValues() {
+    //return the output values on the last node
+    vector<double> values;
+    std::vector<Neuron>::iterator neuronIter;
+    for (neuronIter = neurons[neurons.size() - 1].begin(); neuronIter != neurons[neurons.size() - 1].end(); neuronIter++)
+        values.push_back(neuronIter->fn);
+    return values;
 }

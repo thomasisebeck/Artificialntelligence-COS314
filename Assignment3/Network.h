@@ -51,6 +51,8 @@ public:
     void setTargetVals(std::vector<double> targetVals);
     void testNetwork();
     void print();
+    int getIsMalig();
+    std::vector<double >getOutputValues();
     void feedForward();
     void backPropagate();
 };
