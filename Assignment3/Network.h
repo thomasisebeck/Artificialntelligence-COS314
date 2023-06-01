@@ -10,9 +10,9 @@ class ConnectionRow {
 private:
     std::vector<std::vector<Connection>> connections;
     std::string layer;
-    std::vector<Connection> biasConnections;
     int numRows;
     int numCols;
+    std::vector<double> biasWeights; //added to each node in the calculation
 public:
     ConnectionRow(int rows, int cols, std::string layer);
     void printConnections();
@@ -21,13 +21,14 @@ public:
     std::string getId(int row, int col);
     int getNumRows();
     int getNumCols();
-    std::vector<Connection>& getBiasConnections();
+    std::vector<double>& getBiasWeights();
 };
 
 struct Neuron {
     double fn;
     double derivative;
     double errorTerm;
+    double biasErrorTerm;
 };
 
 class Network {
@@ -40,13 +41,15 @@ private:
     std::vector<ConnectionRow> connections;
     double alpha;
     void printConnectionsAt(int index);
-    ConnectionRow getWeightsCopy(int index);
     void storeErrorTerms();
+    void backPropagateErrors();
+    void correctWeights();
     ConnectionRow oldWeights;
 public:
     Network(std::vector<int> topology, double alpha);
     void setInputVals(std::vector<double> inputVals);
     void setTargetVals(std::vector<double> targetVals);
+    void testNetwork();
     void print();
     void feedForward();
     void backPropagate();
