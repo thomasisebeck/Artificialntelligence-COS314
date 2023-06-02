@@ -31,7 +31,7 @@ void shuffle(vector<dataInstace>& array) {
 
 int main() {
 
-    Network n({2, 3, 1}, 0.5);
+    Network n({2, 3, 1}, 1);
 
 
 
@@ -39,27 +39,19 @@ int main() {
         for (int i = 0; i < 3; i++) {
 
             n.setInputVals({1, 0});
-            n.setTargetVals({0});
+            n.setTargetVals({1});
 
             n.feedForward();
-            cout << "After feed forward (1, 0, t=0) iter" << i << endl;
-            n.print();
-            cout << "-------------------------------------------" << endl;
+            n.resetErrorTerms();
+            n.storeErrorTerms();
             n.backPropagate();
+            n.correctWeights();
+
             cout << "After backprop (1, 0, t=0) iter" << i << endl;
             n.print();
             cout << "-------------------------------------------" << endl;
 
-            n.setInputVals({0, 1});
-            n.setTargetVals({1});
-            n.feedForward();
-            cout << "After feed forward (0, 1, t=1) iter" << i << endl;
-            n.print();
-            cout << "-------------------------------------------" << endl;
-            n.backPropagate();
-            cout << "After backprop (0, 1, t=1) iter" << i << endl;
-            n.print();
-            cout << "-------------------------------------------" << endl;
+
         }
 
         n.setInputVals({1, 0});

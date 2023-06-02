@@ -42,8 +42,6 @@ private:
     double alpha;
     void printConnectionsAt(int index);
     void backPropagateErrors();
-    void correctWeights();
-    void storeErrorTerms();
     ConnectionRow oldWeights;
 public:
     Network(std::vector<int> topology, double alpha);
@@ -55,4 +53,7 @@ public:
     std::vector<double >getOutputValues();
     void feedForward();
     void backPropagate();
+    void storeErrorTerms();
+    void resetErrorTerms();
+    void correctWeights();
 };

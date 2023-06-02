@@ -159,6 +159,28 @@ Neuron sigmoid(double x) {
     return { function, deriv, x };
 }
 
+void Network::resetErrorTerms() {
+    //make all the errors 0 on all nodes
+    for (int i = 0; i < neurons.size(); i++)
+        for (int j = 0; j < neurons[i].size(); j++)
+            neurons[i][j].errorTerm = 0;
+}
+
+void Network::backPropagateErrors() {
+    const int OUTPUT_LAYER = neurons.size() - 1;
+
+    //now backpropagate these error correction terms using the existing weights
+    for (int layerNumber = OUTPUT_LAYER - 1; layerNumber >= 0; layerNumber--)
+        for (int nextLayerNode = 0; nextLayerNode < neurons[layerNumber + 1].size(); nextLayerNode++)
+            for (int prevLayerNode = 0; prevLayerNode < neurons[layerNumber].size(); prevLayerNode++) {
+                neurons[layerNumber][prevLayerNode].errorTerm +=
+                        neurons[layerNumber + 1][nextLayerNode].errorTerm
+                *  connections[layerNumber].getWeight(prevLayerNode, nextLayerNode);
+        }
+
+
+}
+
 void Network::storeErrorTerms() {
     //store in the last nodes, then propagate backwards
 
@@ -169,67 +191,24 @@ void Network::storeErrorTerms() {
         double fn = neurons[OUT_LAYER_IND][i].fn;
         double t = targetVals[i];
 
-        // (target - fn)(f'n)
-        // f'n = (1 - fn)
-        neurons[OUT_LAYER_IND][i].errorTerm = (t - fn) * (fn * (1 - fn));
+        // error = 1/2 * (prediction - actual)^2
+        neurons[OUT_LAYER_IND][i].errorTerm = 0.5 * (t - fn) * (t - fn);
 
         neurons[OUT_LAYER_IND][i].biasErrorTerm =
                 alpha * neurons[OUT_LAYER_IND][i].errorTerm;
     }
 }
 
-void Network::backPropagateErrors() {
-
-    //now backpropagate these error correction terms using the existing weights
-    for (int layerNumber = neurons.size() - 2; layerNumber >= 0; layerNumber--) {
-        //store the error terms in each of the nodes
-        //it's the sum of the error correction terms from the output * weights
-
-        //bias CorrTerm = learning rate * errorTermForThatNode
-
-        //loop through the previous layer nodes
-        //delta = f(n) * (1 - f(n)) * sum(weight_to_next_node * errorTermOfNextNodes)
-        for (int currNeuron = 0; currNeuron < neurons[layerNumber].size(); currNeuron++) {
-            double sumOfWeightsAndErrorTerms = 0;
-            double sumOfOnlyErrorTerms = 0;
-
-            for (int nextNeuron = 0; nextNeuron < neurons[layerNumber + 1].size(); nextNeuron++) { //cols = nuerons in next, rows = neurons in prev
-                //add: errCorrNext * weightToCurr
-                sumOfWeightsAndErrorTerms += neurons[layerNumber + 1][nextNeuron].errorTerm *
-                                             connections[layerNumber].getWeight(currNeuron, nextNeuron);
-                sumOfOnlyErrorTerms += neurons[layerNumber + 1][nextNeuron].errorTerm;
-            }
-
-            //cout << "setting layer " << layerNumber << " neuron " << currNeuron << " error to " << sumOfWeightsAndErrorTerms << endl;
-            //set the current neuron's error term to the sum
-            neurons[layerNumber][currNeuron].errorTerm = sumOfWeightsAndErrorTerms;
-            neurons[layerNumber][currNeuron].biasErrorTerm = sumOfOnlyErrorTerms;
-        }
-
-    }
-
-}
-
 void Network::correctWeights() {
     //loop back from the second last layer
-    for (int i = neurons.size() - 2; i >= 0; i--) {
-        //cout << "correct weights from layer " << i << " to layer " << i + 1 << endl;
-
+    for (int i = 0; i < connections.size(); i++) {
         //loop through the weights
         for (int col = 0; col < connections[i].getNumCols(); col++)
             for (int row = 0; row < connections[i].getNumRows(); row++) {
                 double prevWeight = connections[i].getWeight(row, col);
 
                 //next neuron's error term
-                double deltaWeight = alpha * neurons[i + 1][col].errorTerm;
-
-                //my fn
-                if (i == 0) //input layer
-                    //deltaWeight = alpha * errorOfNext * inputValue
-                    deltaWeight *= inputVals[row];
-                else
-                    //deltaWeight = alpha * errorOfNext * myFn
-                    deltaWeight *= neurons[i][col].fn;
+                double deltaWeight = alpha * neurons[i + 1][col].errorTerm * neurons[i + 1][col].derivative;
 
                 connections[i].setWeight(row, col, prevWeight + deltaWeight);
 
@@ -241,9 +220,7 @@ void Network::correctWeights() {
 }
 
 void Network::backPropagate() {
-    storeErrorTerms(); //error terms are now in the last nodes
     backPropagateErrors(); //all the error correction terms are set for each node
-    correctWeights();
 }
 
 void Network::feedForward() {
@@ -265,21 +242,11 @@ void Network::feedForward() {
                 value += connections[layerNumber - 1].getWeight(neuronFrom, neuronTo) *
                          neurons[layerNumber - 1][neuronFrom].fn;
             }
-
             value += value * connections[layerNumber - 1].getBiasWeights()[neuronTo];
-
-            if (layerNumber == neurons.size() - 1) {
-                cout << "setting " << layerNumber << " " << neuronTo << " to " << sigmoid(value).fn << ", " << sigmoid(value).derivative << " from value " << value << endl;
-                neurons[layerNumber][neuronTo] = sigmoid(value);
-            }
-            else {
-                cout << "setting " << layerNumber << " " << neuronTo << " to " << ReLu(value).fn << ", " << ReLu(value).derivative<< endl;
-                neurons[layerNumber][neuronTo] = ReLu(value);
-            }
+            neurons[layerNumber][neuronTo] = ReLu(value);
         }
 
-    //store the error terms
-    this->storeErrorTerms();
+    storeErrorTerms();
 
 }
 
