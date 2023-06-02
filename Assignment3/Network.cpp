@@ -265,7 +265,7 @@ void Network::feedForward() {
     if (targetVals.empty())
         throw "Target vals is empty";
     if (inputVals.empty())
-        throw "Input vals is empty";
+        throw "Input vals empty";
 
     //set the values in the first neurons
     for (int i = 0; i < neurons[0].size(); i++) {
