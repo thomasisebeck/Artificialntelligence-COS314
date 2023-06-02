@@ -41,9 +41,9 @@ private:
     std::vector<ConnectionRow> connections;
     double alpha;
     void printConnectionsAt(int index);
-    void storeErrorTerms();
     void backPropagateErrors();
     void correctWeights();
+    void storeErrorTerms();
     ConnectionRow oldWeights;
 public:
     Network(std::vector<int> topology, double alpha);

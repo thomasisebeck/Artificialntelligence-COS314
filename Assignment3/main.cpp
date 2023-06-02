@@ -33,44 +33,41 @@ int main() {
 
     Network n({2, 3, 1}, 0.5);
 
-    n.setTargetVals({0});
-    n.setInputVals({1, 0});
-    cout << "target and input vals set: " << endl;
+
 
     try {
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 3; i++) {
+
+            n.setInputVals({1, 0});
+            n.setTargetVals({0});
 
             n.feedForward();
-            cout << "after feed-fwd on iter " << i << endl;
+            cout << "After feed forward (1, 0, t=0) iter" << i << endl;
             n.print();
-
+            cout << "-------------------------------------------" << endl;
             n.backPropagate();
-            cout << "after backprop on iter " << i << endl;
+            cout << "After backprop (1, 0, t=0) iter" << i << endl;
             n.print();
+            cout << "-------------------------------------------" << endl;
 
-            cout << "after iter: " << i << endl;
-            n.print();
-
-            vector<double> vect = n.getOutputValues();
-            cout << "should be 0: " << vect[0] << endl;
-
-            n.setTargetVals({1});
             n.setInputVals({0, 1});
+            n.setTargetVals({1});
             n.feedForward();
-            n.backPropagate();
-
+            cout << "After feed forward (0, 1, t=1) iter" << i << endl;
             n.print();
-            vect = n.getOutputValues();
-            cout << "should be 1: " << vect[0] << endl;
-
+            cout << "-------------------------------------------" << endl;
+            n.backPropagate();
+            cout << "After backprop (0, 1, t=1) iter" << i << endl;
+            n.print();
+            cout << "-------------------------------------------" << endl;
         }
 
-        n.setTargetVals({1});
-        n.setInputVals({0, 1});
+        n.setInputVals({1, 0});
+        n.setTargetVals({0});
         n.testNetwork();
 
-        n.setTargetVals({0});
-        n.setInputVals({1, 0});
+        n.setInputVals({0, 1});
+        n.setTargetVals({1});
         n.testNetwork();
 
 

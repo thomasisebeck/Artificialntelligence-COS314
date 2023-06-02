@@ -9,7 +9,7 @@ ConnectionRow::ConnectionRow(int rows, int cols, string layer) {
         for (int j = 0; j < cols; j++) {
             Connection c {
                     "r" + to_string(i) + "c" + to_string(j),
-                    0.5
+                    1
             };
             row.push_back(c);
         }
@@ -30,24 +30,22 @@ ConnectionRow::ConnectionRow(int rows, int cols, string layer) {
 
 
 void ConnectionRow::printConnections() {
-    cout << "----------------------------------" << endl;
-    cout << "Connections for layer " << layer << endl;
+    cout << "Connections for layer " << layer << ": ";
     vector<vector<Connection>>::iterator outerIter;
     vector<Connection>::iterator innerIter;
 
     if (!connections.empty())
-        for (outerIter = connections.begin(); outerIter != connections.end(); outerIter++) {
-            cout << "[";
+        for (outerIter = connections.begin(); outerIter != connections.end(); outerIter++)
             for (innerIter = (*outerIter).begin(); innerIter != (*outerIter).end(); innerIter++) {
                 cout << innerIter->id << " w" << innerIter->weight;
                     cout << ", ";
             }
-        }
+
 
     for (double b : biasWeights)
         cout << "b" << b << " ";
 
-    cout << "]" << endl;
+    cout << endl;
 
 }
 
@@ -112,7 +110,7 @@ void Network::print() {
     //print neuron col, then connections...
 
     for (int i = 0; i < neurons.size(); i++) {
-        cout << "Row : " << i << endl;
+        cout << "Row " << i << ": ";
         for (int j = 0; j < neurons[i].size(); j++)
             cout << "fn(" << neurons[i][j].fn << "), deriv(" << neurons[i][j].derivative << "), err(" << neurons[i][j].errorTerm << ") ";
         cout << endl;
@@ -174,8 +172,6 @@ void Network::storeErrorTerms() {
         // (target - fn)(f'n)
         // f'n = (1 - fn)
         neurons[OUT_LAYER_IND][i].errorTerm = (t - fn) * (fn * (1 - fn));
-
-        cout << "err out node " << i << ": " << neurons[OUT_LAYER_IND][i].errorTerm << endl;
 
         neurons[OUT_LAYER_IND][i].biasErrorTerm =
                 alpha * neurons[OUT_LAYER_IND][i].errorTerm;
@@ -245,20 +241,9 @@ void Network::correctWeights() {
 }
 
 void Network::backPropagate() {
-
-    //cout << "backpropagating..." << endl;
-
     storeErrorTerms(); //error terms are now in the last nodes
     backPropagateErrors(); //all the error correction terms are set for each node
-
-    cout << "after backpropagation errors: " << endl;
-    this->print();
-
     correctWeights();
-
-    cout << "after correcting weights: " << endl;
-    this->print();
-
 }
 
 void Network::feedForward() {
@@ -269,7 +254,6 @@ void Network::feedForward() {
 
     //set the values in the first neurons
     for (int i = 0; i < neurons[0].size(); i++) {
-        cout << "setting input val " << i << " to " << inputVals[i] << endl;
         neurons[0][i].fn = inputVals[i]; //first layer has no activation function
         neurons[0][i].derivative = 0;
     }
@@ -282,16 +266,20 @@ void Network::feedForward() {
                          neurons[layerNumber - 1][neuronFrom].fn;
             }
 
-            value *= connections[layerNumber - 1].getBiasWeights()[neuronTo];
+            value += value * connections[layerNumber - 1].getBiasWeights()[neuronTo];
 
             if (layerNumber == neurons.size() - 1) {
+                cout << "setting " << layerNumber << " " << neuronTo << " to " << sigmoid(value).fn << ", " << sigmoid(value).derivative << " from value " << value << endl;
                 neurons[layerNumber][neuronTo] = sigmoid(value);
-                cout << "stored fn: " << sigmoid(value).fn << " for input " << value << endl;
-                cout << "stored deriv: " << sigmoid(value).derivative << " for input " << value << endl;
             }
-            else
+            else {
+                cout << "setting " << layerNumber << " " << neuronTo << " to " << ReLu(value).fn << ", " << ReLu(value).derivative<< endl;
                 neurons[layerNumber][neuronTo] = ReLu(value);
+            }
         }
+
+    //store the error terms
+    this->storeErrorTerms();
 
 }
 
