@@ -239,10 +239,9 @@ void Network::feedForward() {
                          neurons[layerNumber - 1][neuronFrom].fn;
             }
             value += value * connections[layerNumber - 1].getBiasWeights()[neuronTo];
+
             neurons[layerNumber][neuronTo] = ReLu(value);
         }
-
-    storeErrorTerms();
 
 }
 

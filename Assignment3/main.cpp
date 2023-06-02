@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <iomanip>
 #include "Network.h"
 using namespace std;
 
@@ -29,41 +30,8 @@ void shuffle(vector<dataInstace>& array) {
     }
 }
 
-int main() {
+vector<dataInstace> getDataInstances() {
 
-    Network n({2, 3, 1}, 0.1);
-
-    n.connections[0].setWeight(0,0,0.11);
-    n.connections[0].setWeight(1,0,0.21);
-    n.connections[0].setWeight(0,1,0.12);
-    n.connections[0].setWeight(1,1,0.08);
-
-    n.connections[1].setWeight(1,0, 0.14);
-    n.connections[1].setWeight(0,0, 0.15);
-
-    try {
-
-        n.setInputVals({2, 3});
-        n.setTargetVals({1});
-
-        for (int i = 0; i < 200; i++) {
-
-            n.feedForward();
-            vector<double> outputValues = n.getOutputValues();
-            n.resetErrorTerms();
-            n.storeErrorTerms();
-            n.backPropagate();
-            n.correctWeights();
-            n.printOutputError();
-
-
-        }
-
-    } catch (const char* msg) {
-        cout << msg << endl;
-    }
-
-    /*
     ifstream myFile;
     myFile.open("data.txt");
 
@@ -268,27 +236,37 @@ int main() {
         cout << err << endl;
     }
 
-    shuffle(instances);
+    return instances;
 
-    for (dataInstace d: instances) {
-        cout << d.age << " ";
-        cout << d.maturity << " ";
-        cout << d.maturedBy << " ";
-        cout << d.weeks << " ";
-        cout << d.isMalig << " ";
-        cout << d.size << " ";
-        cout << d.side << " ";
-        cout << d.specificSide << " ";
-        cout << d.positive << endl;
-    }
+}
+
+void setInitialWeights(Network& n, vector<int> topology) {
+    for (int layer = 0; layer < topology.size() - 1; layer++)
+        for (int row = 0; row < topology[layer]; row++)
+            for (int col = 0; col < topology[layer + 1]; col++)
+                //set a random, small weight (between 0.1 and 0.5)
+                n.connections[layer].setWeight(row, col, static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/0.4) + 0.1));
+
+}
+
+int main() {
+
+    vector<dataInstace> instances = getDataInstances();
+    shuffle(instances);
 
     try {
         //you need 8 input nodes and 1 output node
 
-        vector<int> topology = {7, 5, 10, 1};
+        vector<int> topology = {9, 5, 10, 1};
         Network n(topology, 0.05);
 
+        //set random, small weights
+        setInitialWeights(n,topology);
+
+        cout << "training network..." << endl;
+
         for (dataInstace d: instances) {
+
             vector<double> inputVals = {
                     d.age,
                     d.maturity,
@@ -296,21 +274,26 @@ int main() {
                     d.weeks,
                     d.size,
                     d.side,
-                    d.specificSide
+                    d.specificSide,
+                    d.isMalig,
+                    d.positive
             };
-            vector<double> targetVals = { d.isMalig };
 
+            vector<double> targetVals = { d.recurrent };
+
+            n.resetErrorTerms();
             n.setInputVals(inputVals);
             n.setTargetVals(targetVals);
             n.feedForward();
-
-            cout << "trying to get : " << d.isMalig << endl;
-            cout << "got: " << n.getOutputValues()[0] << endl;
-
+            n.storeErrorTerms();
             n.backPropagate();
+            n.correctWeights();
+
         }
 
-        cout << "----------------- testing network ---------------------" << endl;
+        cout << "Testing the network..." << endl;
+
+        int correctValues = 0;
 
         for (dataInstace d: instances) {
             vector<double> inputVals = {
@@ -320,20 +303,28 @@ int main() {
                     d.weeks,
                     d.size,
                     d.side,
-                    d.specificSide
+                    d.specificSide,
+                    d.isMalig,
+                    d.positive
             };
+
+            vector<double> targetVals = { d.recurrent };
 
             n.setInputVals(inputVals);
             n.feedForward();
-            cout << "got: " << n.getOutputValues()[0] << "(" << d.isMalig << ")" << endl;
+            vector<double> myOutput = n.getOutputValues();
 
+            if (myOutput[0] == targetVals[0])
+                correctValues++;
         }
 
-        cout << "-------------------------------------------------------" << endl;
+        cout << "------------- RESULTS ------------" << endl;
+
+        cout << setprecision(2) << (static_cast<double>(correctValues) / instances.size()) * 100 << "%" << endl;
 
     } catch (const char * msg) {
         cout << msg << endl;
-    }*/
+    }
 
     return 0;
 }
