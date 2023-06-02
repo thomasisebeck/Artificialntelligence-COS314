@@ -31,37 +31,33 @@ void shuffle(vector<dataInstace>& array) {
 
 int main() {
 
-    Network n({2, 3, 1}, 1);
+    Network n({2, 3, 1}, 0.1);
 
+    n.connections[0].setWeight(0,0,0.11);
+    n.connections[0].setWeight(1,0,0.21);
+    n.connections[0].setWeight(0,1,0.12);
+    n.connections[0].setWeight(1,1,0.08);
 
+    n.connections[1].setWeight(1,0, 0.14);
+    n.connections[1].setWeight(0,0, 0.15);
 
     try {
-        for (int i = 0; i < 3; i++) {
 
-            n.setInputVals({1, 0});
-            n.setTargetVals({1});
+        n.setInputVals({2, 3});
+        n.setTargetVals({1});
+
+        for (int i = 0; i < 200; i++) {
 
             n.feedForward();
+            vector<double> outputValues = n.getOutputValues();
             n.resetErrorTerms();
             n.storeErrorTerms();
             n.backPropagate();
             n.correctWeights();
-
-            cout << "After backprop (1, 0, t=0) iter" << i << endl;
-            n.print();
-            cout << "-------------------------------------------" << endl;
+            n.printOutputError();
 
 
         }
-
-        n.setInputVals({1, 0});
-        n.setTargetVals({0});
-        n.testNetwork();
-
-        n.setInputVals({0, 1});
-        n.setTargetVals({1});
-        n.testNetwork();
-
 
     } catch (const char* msg) {
         cout << msg << endl;

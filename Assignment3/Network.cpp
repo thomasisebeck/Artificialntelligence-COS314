@@ -166,7 +166,7 @@ void Network::resetErrorTerms() {
             neurons[i][j].errorTerm = 0;
 }
 
-void Network::backPropagateErrors() {
+void Network::backPropagate() {
     const int OUTPUT_LAYER = neurons.size() - 1;
 
     //now backpropagate these error correction terms using the existing weights
@@ -191,11 +191,11 @@ void Network::storeErrorTerms() {
         double fn = neurons[OUT_LAYER_IND][i].fn;
         double t = targetVals[i];
 
-        // error = 1/2 * (prediction - actual)^2
-        neurons[OUT_LAYER_IND][i].errorTerm = 0.5 * (t - fn) * (t - fn);
+        // error = prediction - actual
+        neurons[OUT_LAYER_IND][i].errorTerm = fn - t;
 
-        neurons[OUT_LAYER_IND][i].biasErrorTerm =
-                alpha * neurons[OUT_LAYER_IND][i].errorTerm;
+//        neurons[OUT_LAYER_IND][i].biasErrorTerm =
+//                alpha * neurons[OUT_LAYER_IND][i].errorTerm;
     }
 }
 
@@ -208,19 +208,15 @@ void Network::correctWeights() {
                 double prevWeight = connections[i].getWeight(row, col);
 
                 //next neuron's error term
-                double deltaWeight = alpha * neurons[i + 1][col].errorTerm * neurons[i + 1][col].derivative;
+                double deltaWeight = alpha * neurons[i + 1][col].errorTerm;
 
-                connections[i].setWeight(row, col, prevWeight + deltaWeight);
+                connections[i].setWeight(row, col, prevWeight - deltaWeight);
 
                 //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
                 connections[i].getBiasWeights()[col] += deltaWeight; //not times input
             }
     }
 
-}
-
-void Network::backPropagate() {
-    backPropagateErrors(); //all the error correction terms are set for each node
 }
 
 void Network::feedForward() {
@@ -282,4 +278,14 @@ std::vector<double> Network::getOutputValues() {
     for (neuronIter = neurons[neurons.size() - 1].begin(); neuronIter != neurons[neurons.size() - 1].end(); neuronIter++)
         values.push_back(neuronIter->fn);
     return values;
+}
+
+void Network::printOutputError() {
+    cout << "---- error on output ------" << endl;
+
+    std::vector<Neuron>::iterator neuronIter;
+    for (neuronIter = neurons[neurons.size() - 1].begin(); neuronIter != neurons[neurons.size() - 1].end(); neuronIter++)
+        cout << neuronIter->errorTerm << endl;
+
+    cout << "---------------------------" << endl;
 }

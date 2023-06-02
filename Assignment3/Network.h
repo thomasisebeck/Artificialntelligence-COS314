@@ -38,12 +38,11 @@ private:
     std::vector<double> currBiasErrorTerms;
     std::vector<double> targetVals;
     std::vector<double> inputVals;
-    std::vector<ConnectionRow> connections;
     double alpha;
     void printConnectionsAt(int index);
-    void backPropagateErrors();
     ConnectionRow oldWeights;
 public:
+    std::vector<ConnectionRow> connections;
     Network(std::vector<int> topology, double alpha);
     void setInputVals(std::vector<double> inputVals);
     void setTargetVals(std::vector<double> targetVals);
@@ -56,4 +55,5 @@ public:
     void storeErrorTerms();
     void resetErrorTerms();
     void correctWeights();
+    void printOutputError();
 };
