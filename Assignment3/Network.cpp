@@ -249,14 +249,15 @@ void Network::backPropagate() {
     //cout << "backpropagating..." << endl;
 
     storeErrorTerms(); //error terms are now in the last nodes
+    backPropagateErrors(); //all the error correction terms are set for each node
 
-    cout << "after storing error terms: " << endl;
+    cout << "after backpropagation errors: " << endl;
     this->print();
 
-    backPropagateErrors(); //all the error correction terms are set for each node
     correctWeights();
 
-   // print();
+    cout << "after correcting weights: " << endl;
+    this->print();
 
 }
 
