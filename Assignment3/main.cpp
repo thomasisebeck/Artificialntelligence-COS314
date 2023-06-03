@@ -3,22 +3,9 @@
 #include <fstream>
 #include <iomanip>
 #include "Network.h"
+#include "GP.h"
+#include "sharedTypes.h"
 using namespace std;
-
-//no-recurrence-events,30-39,premeno,30-34,0-2,no,3,left,left_low,no
-
-struct dataInstace {
-    double recurrent;
-    double age;
-    double maturity;
-    double maturedBy;
-    double weeks;
-    double isMalig;
-    double size;
-    double side;
-    double specificSide;
-    double positive;
-};
 
 void shuffle(vector<dataInstace>& array) {
     for (int i = 0; i < array.size(); i++) {
@@ -45,6 +32,8 @@ vector<dataInstace> getDataInstances() {
     try {
 
         while (!myFile.eof()) {
+
+            bool discard = false;
 
             dataInstace instance;
 
@@ -159,7 +148,7 @@ vector<dataInstace> getDataInstances() {
             else if (currValue == "no")
                 instance.isMalig = 1;
             else if (currValue == "?")
-                instance.isMalig = 2;
+                discard = true;
             else {
                 cout << currValue << endl;
                 throw "is malig by not found";
@@ -208,13 +197,13 @@ vector<dataInstace> getDataInstances() {
             else if (currValue == "central")
                 instance.specificSide = 4;
             else if (currValue == "?")
-                instance.specificSide = 5;
+                discard = true;
             else {
                 cout << currValue << endl;
                 throw "size not found";
             }
 
-            //--------------------- specificSide -------------------------//
+            //--------------------- positive -------------------------//
             currValue = line;
 
             if (currValue == "no")
@@ -226,7 +215,8 @@ vector<dataInstace> getDataInstances() {
                 throw "positive not found";
             }
 
-            instances.push_back(instance);
+            if (!discard)
+                instances.push_back(instance);
 
             getline(myFile, line);
 
@@ -249,80 +239,138 @@ void setInitialWeights(Network& n, vector<int> topology) {
 
 }
 
-int main() {
+void NeuralNetwork() {
 
     vector<dataInstace> instances = getDataInstances();
     shuffle(instances);
 
+    const int EPOCHS = 5;
+
     try {
-        //you need 8 input nodes and 1 output node
 
-        vector<int> topology = {9, 5, 10, 1};
-        Network n(topology, 0.05);
+        int truePositives = 0;
+        int falsePositives = 0;
+        int trueNegatives = 0;
+        int falseNegatives = 0;
 
-        //set random, small weights
-        setInitialWeights(n,topology);
+        int zero = 0;
+        int one = 0;
 
-        cout << "training network..." << endl;
+        for (int i = 0; i < EPOCHS; i++) {
 
-        for (dataInstace d: instances) {
+            vector<int> topology = {9, 5, 4, 1}; //71%
+            float alpha = 0.1; //71%
+            Network n(topology, alpha);//10050
 
-            vector<double> inputVals = {
-                    d.age,
-                    d.maturity,
-                    d.maturedBy,
-                    d.weeks,
-                    d.size,
-                    d.side,
-                    d.specificSide,
-                    d.isMalig,
-                    d.positive
-            };
+            //set random, small weights
+            setInitialWeights(n,topology);
 
-            vector<double> targetVals = { d.recurrent };
+            for (int trainingCounter = 0; trainingCounter < instances.size(); trainingCounter++) {
 
-            n.resetErrorTerms();
-            n.setInputVals(inputVals);
-            n.setTargetVals(targetVals);
-            n.feedForward();
-            n.storeErrorTerms();
-            n.backPropagate();
-            n.correctWeights();
+                vector<double> inputVals = {
+                        instances[trainingCounter].age,
+                        instances[trainingCounter].maturity,
+                        instances[trainingCounter].maturedBy,
+                        instances[trainingCounter].weeks,
+                        instances[trainingCounter].size,
+                        instances[trainingCounter].side,
+                        instances[trainingCounter].specificSide,
+                        instances[trainingCounter].isMalig,
+                        instances[trainingCounter].positive
+                };
 
-        }
+                vector<double> targetVals = {instances[trainingCounter].recurrent};
 
-        cout << "Testing the network..." << endl;
+                n.resetErrorTerms();
+                n.setInputVals(inputVals);
+                n.setTargetVals(targetVals);
+                n.feedForward();
+                n.storeErrorTerms();
+                n.backPropagate();
+                n.correctWeights();
 
-        int correctValues = 0;
+                n.print();
 
-        for (dataInstace d: instances) {
-            vector<double> inputVals = {
-                    d.age,
-                    d.maturity,
-                    d.maturedBy,
-                    d.weeks,
-                    d.size,
-                    d.side,
-                    d.specificSide,
-                    d.isMalig,
-                    d.positive
-            };
+            }
 
-            vector<double> targetVals = { d.recurrent };
+            for (int testingCounter = 0; testingCounter < instances.size(); testingCounter++) {
+                vector<double> inputVals = {
+                        instances[testingCounter].age,
+                        instances[testingCounter].maturity,
+                        instances[testingCounter].maturedBy,
+                        instances[testingCounter].weeks,
+                        instances[testingCounter].size,
+                        instances[testingCounter].side,
+                        instances[testingCounter].specificSide,
+                        instances[testingCounter].isMalig,
+                        instances[testingCounter].positive
+                };
 
-            n.setInputVals(inputVals);
-            n.feedForward();
-            vector<double> myOutput = n.getOutputValues();
+                vector<double> targetVals = {instances[testingCounter].recurrent};
 
-            if (myOutput[0] == targetVals[0])
-                correctValues++;
-        }
+                n.setInputVals(inputVals);
+                n.feedForward();
+                vector<double> myOutput = n.getOutputValues();
 
-        cout << "------------- RESULTS ------------" << endl;
+//                cout << myOutput[0] << endl;
 
-        cout << setprecision(2) << (static_cast<double>(correctValues) / instances.size()) * 100 << "%" << endl;
+//                n.print();
+
+                if (myOutput[0] == targetVals[0]) {
+                    if (myOutput[0] == 0) //true negative
+                        trueNegatives++;
+                    if (myOutput[0] == 1) //true positive
+                        truePositives++;
+                }
+                else {
+                    if (myOutput[0] == 1) //false positive
+                        falsePositives++;
+                    if (myOutput[0] == 0) //false negative
+                        falseNegatives++;
+                }
+            }
+
+        } //epoch counter
+
+//        cout << "Accuracy: " << setprecision(2) << static_cast<double>(truePositives + trueNegatives) / (truePositives + trueNegatives + falsePositives + falseNegatives) * 100 << "%" << endl;
+
+        double recall = static_cast<double>(truePositives) / (truePositives + falseNegatives);
+        double precision = static_cast<double>(truePositives) / (truePositives + falsePositives);
+
+//        cout << "TP" << truePositives << endl;
+//        cout << "TN" << trueNegatives << endl;
+//        cout << "FP" << falsePositives << endl;
+//        cout << "FN" << falseNegatives << endl;
+//
+//        cout << "F-score: " << setprecision(2) << 2 * static_cast<double>(precision * recall) / (precision + recall) << endl;
 
     } catch (const char * msg) {
+        cout << msg << endl;
+    }
+}
+
+void Genetic() {
+
+    vector<dataInstace> instances = getDataInstances();
+    shuffle(instances);
+
+    Tree myTree(5, instances);
+    myTree.print();
+
+
+}
+
+int main() {
+
+   NeuralNetwork();
+
+    try {
+        //Genetic();
+    } catch (const char* msg) {
+        cout << endl << "ERROR: ";
+        cout << msg << endl;
+    }   catch (int msg) {
+        cout << endl << "ERROR: ";
         cout << msg << endl;
     }
 
