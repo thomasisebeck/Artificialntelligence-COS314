@@ -278,32 +278,75 @@ int main() {
 
     try {
 
-        vector<int> topology = {2, 1};
+        vector<int> topology = {3, 2};
         Network n(topology, 0.25);
-        vector<double> targetVals = {0};
-        vector<double> inputVals = {0, 1};
-        n.setInputVals(inputVals);
-        n.setTargetVals(targetVals);
 
-        n.connections[0].setWeight(0, 0, 1);
-        n.connections[0].setWeight(0, 1, 1);
-        n.connections[0].setWeight(0, 1, 1);
-        n.connections[0].biasWeights = {0};
-//
-//        n.feedForward();
-//        vector<double> outputValues = n.getOutputValues();
-//        cout << outputValues[0] << endl;
+        vector<vector<double>> trainingSetInput = {
+                { 0, 1, 1 },
+                { 0, 0.9, 0.95 },
+                { 0, 0.75, 0.91 },
+                { 0.01, 1, 0.85 },
 
-        for (int i = 0; i < 2000; i++) {
+                { 1, 0, 1 },
+                { 0.9, 0, 0.95 },
+                { 0.95, 0.05, 0.96 },
+                { 0.98, 0.02, 1 }
+        };
 
+        vector<vector<double>> trainingSetOutput = {
+                { 1, 0 },
+                { 1, 0 },
+                { 1, 0 },
+                { 1, 0 },
+
+                { 0, 1 },
+                { 0, 1 },
+                { 0, 1 },
+                { 0, 1 }
+        };
+
+        vector<vector<double>> testSetInput = {
+                { 0.99, 0, 1 },
+                { 0, 0.9, 0.95 },
+                { 0, 0.75, 0.91 },
+                { 0.98, 0.05, 0.95 }
+        };
+
+        vector<vector<double>> testSetOutput = {
+                { 0, 1 },
+                { 1, 0 },
+                { 1, 0 },
+                { 0, 1 },
+        };
+
+        const int EPOCHS = 50;
+
+        for (int i = 0; i < EPOCHS; i++) {
+
+            for (int trainingNumber = 0; trainingNumber < trainingSetInput.size(); trainingNumber++) {
+                n.setInputVals(trainingSetInput[trainingNumber]);
+                n.setTargetVals(trainingSetOutput[trainingNumber]);
+                n.feedForward();
+                n.resetErrorTerms();
+                n.storeErrorTerms();
+                n.backPropagate();
+                n.correctWeights();
+            }
+
+        }
+
+        cout << "results: " << endl;
+
+        for (int testNumber = 0; testNumber < testSetInput.size(); testNumber++) {
+            n.setInputVals(testSetInput[testNumber]);
+            n.setTargetVals(testSetOutput[testNumber]);
             n.feedForward();
             vector<double> outputValues = n.getOutputValues();
-            cout << outputValues[0] << endl;
-            n.resetErrorTerms();
-            n.storeErrorTerms();
-            n.backPropagate();
-            n.correctWeights();
-            n.print();
+            cout << testSetInput[testNumber][0] << " "
+                << testSetInput[testNumber][1] << " "
+                << testSetInput[testNumber][2] << " = "
+                << outputValues[0] << " "
+                << outputValues[1] << endl;
         }
 
 

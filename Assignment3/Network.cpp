@@ -212,24 +212,20 @@ void Network::correctWeights() {
     for (int connNumber = 0; connNumber < connections.size(); connNumber++) {
         //loop through the weights
 
-        //k = index of the input node
-        //j = index of output node
-        for (int k = 0; k < connections[connNumber].getNumInNodesCol_M(); k++)
-            for (int i = 0; i < connections[connNumber].getNumOutNodesRow_J(); i++) {
-                double previousWeight = connections[connNumber].getWeight(i, k);
+        if (connNumber == connections.size() - 1)
+            for (int k = 0; k < connections[connNumber].getNumInNodesCol_M(); k++)
+                for (int i = 0; i < connections[connNumber].getNumOutNodesRow_J(); i++) {
+                    double previousWeight = connections[connNumber].getWeight(i, k);
 
-                //j neuron's error term
-                double weightCorrectionTerm = alpha * neurons[connNumber + 1][i].errorInformationTerm * neurons[connNumber][k].fn;
+                    //j neuron's error term
+                    double weightCorrectionTerm = alpha * neurons[connNumber + 1][i].errorInformationTerm * neurons[connNumber][k].fn;
 
-                cout << "weight correction term: " << weightCorrectionTerm << endl;
+                    cout << "weight correction term: " << weightCorrectionTerm << endl;
 
-                double biasDelta = alpha * neurons[connNumber + 1][i].errorInformationTerm;
+                    double biasDelta = alpha * neurons[connNumber + 1][i].errorInformationTerm;
 
-                connections[connNumber].setWeight(i, k, previousWeight + weightCorrectionTerm);
-
-//                //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
-//                connections[i].getBiasWeights()[col] += biasDelta; //not times input
-            }
+                    connections[connNumber].setWeight(i, k, previousWeight + weightCorrectionTerm);
+                }
     }
 
 }
