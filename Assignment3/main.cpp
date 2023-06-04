@@ -279,7 +279,7 @@ int main() {
 
     try {
 
-        vector<int> topology = {3, 2};
+        vector<int> topology = {3, 3, 2};
         Network n(topology, 0.25);
 
         vector<vector<double>> trainingSetInput = {
