@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include "Network.h"
+#include <cmath>
 using namespace std;
 
 //no-recurrence-events,30-39,premeno,30-34,0-2,no,3,left,left_low,no
@@ -29,9 +30,8 @@ void shuffle(vector<dataInstace>& array) {
     }
 }
 
-int main() {
-
-    Network n({2, 3, 1}, 0.1);
+/*
+ Network n({2, 3, 1}, 0.1);
 
     n.connections[0].setWeight(0,0,0.11);
     n.connections[0].setWeight(1,0,0.21);
@@ -62,8 +62,9 @@ int main() {
     } catch (const char* msg) {
         cout << msg << endl;
     }
+ */
 
-    /*
+vector<dataInstace> readInstances() {
     ifstream myFile;
     myFile.open("data.txt");
 
@@ -268,27 +269,20 @@ int main() {
         cout << err << endl;
     }
 
-    shuffle(instances);
+    return instances;
+}
 
-    for (dataInstace d: instances) {
-        cout << d.age << " ";
-        cout << d.maturity << " ";
-        cout << d.maturedBy << " ";
-        cout << d.weeks << " ";
-        cout << d.isMalig << " ";
-        cout << d.size << " ";
-        cout << d.side << " ";
-        cout << d.specificSide << " ";
-        cout << d.positive << endl;
-    }
+int main() {
+
+    vector<dataInstace> myInstances = readInstances();
 
     try {
-        //you need 8 input nodes and 1 output node
 
-        vector<int> topology = {7, 5, 10, 1};
-        Network n(topology, 0.05);
+        vector<int> topology = {7, 1};
+        Network n(topology, 0.1);
 
-        for (dataInstace d: instances) {
+        for (dataInstace d : myInstances) {
+
             vector<double> inputVals = {
                     d.age,
                     d.maturity,
@@ -303,37 +297,21 @@ int main() {
             n.setInputVals(inputVals);
             n.setTargetVals(targetVals);
             n.feedForward();
-
-            cout << "trying to get : " << d.isMalig << endl;
-            cout << "got: " << n.getOutputValues()[0] << endl;
-
+            vector<double> outputValues = n.getOutputValues();
+            n.resetErrorTerms();
+            n.storeErrorTerms();
             n.backPropagate();
-        }
+            n.correctWeights();
+            n.printOutputError();
 
-        cout << "----------------- testing network ---------------------" << endl;
-
-        for (dataInstace d: instances) {
-            vector<double> inputVals = {
-                    d.age,
-                    d.maturity,
-                    d.maturedBy,
-                    d.weeks,
-                    d.size,
-                    d.side,
-                    d.specificSide
-            };
-
-            n.setInputVals(inputVals);
-            n.feedForward();
-            cout << "got: " << n.getOutputValues()[0] << "(" << d.isMalig << ")" << endl;
+            cout << "tried to get: " << d.isMalig << endl;
+            cout << "got : " << round(n.getOutputValues()[0]) << endl;
 
         }
 
-        cout << "-------------------------------------------------------" << endl;
-
-    } catch (const char * msg) {
+    } catch (const char* msg) {
         cout << msg << endl;
-    }*/
+    }
 
     return 0;
 }

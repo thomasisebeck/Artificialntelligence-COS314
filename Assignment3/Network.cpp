@@ -92,6 +92,12 @@ Network::Network(vector<int> topology, double alpha) : oldWeights(0,0,"empty") {
         connections.emplace_back(rows, cols, layerName);
     }
 
+    for (int index = 0; index < topology.size(); index++)
+        for (int row = 0; row < connections[index].getNumRows(); row++)
+            for (int col = 0; col < connections[index].getNumCols(); col++)
+                connections[index].setWeight(row, col, 0.1);
+
+
     this->alpha = alpha;
 
 }
@@ -192,7 +198,7 @@ void Network::storeErrorTerms() {
         double t = targetVals[i];
 
         // error = prediction - actual
-        neurons[OUT_LAYER_IND][i].errorTerm = fn - t;
+        neurons[OUT_LAYER_IND][i].errorTerm = (t - fn);
 
 //        neurons[OUT_LAYER_IND][i].biasErrorTerm =
 //                alpha * neurons[OUT_LAYER_IND][i].errorTerm;
@@ -208,12 +214,14 @@ void Network::correctWeights() {
                 double prevWeight = connections[i].getWeight(row, col);
 
                 //next neuron's error term
-                double deltaWeight = alpha * neurons[i + 1][col].errorTerm;
+                double deltaWeight = alpha * neurons[i + 1][col].errorTerm * 0.5;
 
-                connections[i].setWeight(row, col, prevWeight - deltaWeight);
+                if (deltaWeight > 0.01 || deltaWeight < -0.01) {
+                    connections[i].setWeight(row, col, prevWeight + deltaWeight);
+                    //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
+                    connections[i].getBiasWeights()[col] += deltaWeight; //not times input
+                }
 
-                //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
-                connections[i].getBiasWeights()[col] += deltaWeight; //not times input
             }
     }
 
