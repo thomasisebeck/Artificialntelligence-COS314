@@ -3,10 +3,10 @@
 #include <cmath>
 using namespace std;
 
-ConnectionRow::ConnectionRow(int rows, int cols, string layer) {
-    for (int i = 0; i < rows; i++) {
+ConnectionRow::ConnectionRow(int inputNodes, int outputNodes, string layer) {
+    for (int i = 0; i < outputNodes; i++) {
         vector<Connection> row;
-        for (int j = 0; j < cols; j++) {
+        for (int j = 0; j < inputNodes; j++) {
             Connection c {
                     "r" + to_string(i) + "c" + to_string(j),
                     1
@@ -17,13 +17,13 @@ ConnectionRow::ConnectionRow(int rows, int cols, string layer) {
     }
 
     //push back as many bias values as there are columns
-    for (int i = 0; i < cols; i++)
+    for (int i = 0; i < outputNodes; i++)
         this->biasWeights.push_back(0);
 
     this->layer = layer;
 
-    this->numCols = cols;
-    this->numRows = rows;
+    this->outputNodesRow_j = outputNodes;
+    this->inputNodesCol_m = inputNodes;
 
 }
 
@@ -38,7 +38,7 @@ void ConnectionRow::printConnections() {
         for (outerIter = connections.begin(); outerIter != connections.end(); outerIter++)
             for (innerIter = (*outerIter).begin(); innerIter != (*outerIter).end(); innerIter++) {
                 cout << innerIter->id << " w" << innerIter->weight;
-                    cout << ", ";
+                cout << ", ";
             }
 
 
@@ -49,24 +49,24 @@ void ConnectionRow::printConnections() {
 
 }
 
-double ConnectionRow::getWeight(int row, int col) {
-    return connections[row][col].weight;
+double ConnectionRow::getWeight(int outNodesRowJ, int inNodesColM) {
+    return connections[outNodesRowJ][inNodesColM].weight;
 }
 
-void ConnectionRow::setWeight(int row, int col, double weight) {
-    connections[row][col].weight = weight;
+void ConnectionRow::setWeight(int outNodesRowJ, int inNodesColM, double weight) {
+    connections[outNodesRowJ][inNodesColM].weight = weight;
 }
 
 std::string ConnectionRow::getId(int row, int col) {
     return connections[row][col].id;
 }
 
-int ConnectionRow::getNumCols() {
-    return numCols;
+int ConnectionRow::getNumOutNodesRow_J() {
+    return outputNodesRow_j;
 }
 
-int ConnectionRow::getNumRows() {
-    return numRows;
+int ConnectionRow::getNumInNodesCol_M() {
+    return inputNodesCol_m;
 }
 
 vector<double>& ConnectionRow::getBiasWeights() {
@@ -92,12 +92,6 @@ Network::Network(vector<int> topology, double alpha) : oldWeights(0,0,"empty") {
         connections.emplace_back(rows, cols, layerName);
     }
 
-    for (int index = 0; index < topology.size(); index++)
-        for (int row = 0; row < connections[index].getNumRows(); row++)
-            for (int col = 0; col < connections[index].getNumCols(); col++)
-                connections[index].setWeight(row, col, 0.1);
-
-
     this->alpha = alpha;
 
 }
@@ -118,7 +112,7 @@ void Network::print() {
     for (int i = 0; i < neurons.size(); i++) {
         cout << "Row " << i << ": ";
         for (int j = 0; j < neurons[i].size(); j++)
-            cout << "fn(" << neurons[i][j].fn << "), deriv(" << neurons[i][j].derivative << "), err(" << neurons[i][j].errorTerm << ") ";
+            cout << "fn(" << neurons[i][j].fn << "), deriv(" << neurons[i][j].derivative << "), err(" << neurons[i][j].errorInformationTerm << ") ";
         cout << endl;
 
         if (i != neurons.size() - 1)
@@ -143,9 +137,9 @@ void Network::printConnectionsAt(int index) {
     for (iter = currentNeurons.begin(); iter != currentNeurons.end(); iter++)
         cout << (*iter).fn << endl;
 
-    for (int row = 0; row < connections[index].getNumRows(); row++) {
+    for (int row = 0; row < connections[index].getNumInNodesCol_M(); row++) {
         cout << "[";
-        for (int col = 0; col < connections[index].getNumCols(); col++)
+        for (int col = 0; col < connections[index].getNumOutNodesRow_J(); col++)
             cout << connections[index].getWeight(row, col) << " ";
         cout << "]" << endl;
     }
@@ -156,20 +150,20 @@ void Network::printConnectionsAt(int index) {
 Neuron ReLu(double x) {
     double function = x >= 0 ? x : 0;
     double deriv = x >= 0 ? 1 : 0;
-    return { function , deriv, x };
+    return { function , deriv };
 }
 
 Neuron sigmoid(double x) {
     double function = static_cast<double>(1) / (1 + exp(-x));
     double deriv = function * (1 - function);
-    return { function, deriv, x };
+    return { function, deriv };
 }
 
 void Network::resetErrorTerms() {
     //make all the errors 0 on all nodes
     for (int i = 0; i < neurons.size(); i++)
         for (int j = 0; j < neurons[i].size(); j++)
-            neurons[i][j].errorTerm = 0;
+            neurons[i][j].errorInformationTerm = 0;
 }
 
 void Network::backPropagate() {
@@ -179,10 +173,10 @@ void Network::backPropagate() {
     for (int layerNumber = OUTPUT_LAYER - 1; layerNumber >= 0; layerNumber--)
         for (int nextLayerNode = 0; nextLayerNode < neurons[layerNumber + 1].size(); nextLayerNode++)
             for (int prevLayerNode = 0; prevLayerNode < neurons[layerNumber].size(); prevLayerNode++) {
-                neurons[layerNumber][prevLayerNode].errorTerm +=
-                        neurons[layerNumber + 1][nextLayerNode].errorTerm
-                *  connections[layerNumber].getWeight(prevLayerNode, nextLayerNode);
-        }
+                neurons[layerNumber][prevLayerNode].errorInformationTerm +=
+                        neurons[layerNumber + 1][nextLayerNode].errorInformationTerm
+                        *  connections[layerNumber].getWeight(nextLayerNode, prevLayerNode);
+            }
 
 
 }
@@ -195,10 +189,18 @@ void Network::storeErrorTerms() {
     for (int i = 0; i < targetVals.size(); i++) {
         //difference = target - fn
         double fn = neurons[OUT_LAYER_IND][i].fn;
+        double deriv = neurons[OUT_LAYER_IND][i].derivative;
         double t = targetVals[i];
 
+        cout << "expeted: " << t << endl;
+        cout << "output: " << fn << endl;
+        double error = t - fn;
+        cout << "error: " << error << endl;
+
         // error = prediction - actual
-        neurons[OUT_LAYER_IND][i].errorTerm = (t - fn);
+        neurons[OUT_LAYER_IND][i].errorInformationTerm = (t - fn) * deriv;
+
+        cout << "error information term: " << neurons[OUT_LAYER_IND][i].errorInformationTerm << endl;
 
 //        neurons[OUT_LAYER_IND][i].biasErrorTerm =
 //                alpha * neurons[OUT_LAYER_IND][i].errorTerm;
@@ -207,21 +209,26 @@ void Network::storeErrorTerms() {
 
 void Network::correctWeights() {
     //loop back from the second last layer
-    for (int i = 0; i < connections.size(); i++) {
+    for (int connNumber = 0; connNumber < connections.size(); connNumber++) {
         //loop through the weights
-        for (int col = 0; col < connections[i].getNumCols(); col++)
-            for (int row = 0; row < connections[i].getNumRows(); row++) {
-                double prevWeight = connections[i].getWeight(row, col);
 
-                //next neuron's error term
-                double deltaWeight = alpha * neurons[i + 1][col].errorTerm * 0.5;
+        //k = index of the input node
+        //j = index of output node
+        for (int k = 0; k < connections[connNumber].getNumInNodesCol_M(); k++)
+            for (int i = 0; i < connections[connNumber].getNumOutNodesRow_J(); i++) {
+                double previousWeight = connections[connNumber].getWeight(i, k);
 
-                if (deltaWeight > 0.01 || deltaWeight < -0.01) {
-                    connections[i].setWeight(row, col, prevWeight + deltaWeight);
-                    //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
-                    connections[i].getBiasWeights()[col] += deltaWeight; //not times input
-                }
+                //j neuron's error term
+                double weightCorrectionTerm = alpha * neurons[connNumber + 1][i].errorInformationTerm * neurons[connNumber][k].fn;
 
+                cout << "weight correction term: " << weightCorrectionTerm << endl;
+
+                double biasDelta = alpha * neurons[connNumber + 1][i].errorInformationTerm;
+
+                connections[connNumber].setWeight(i, k, previousWeight + weightCorrectionTerm);
+
+//                //now correct the bias for this layer using error terms stored in biasErrorTerm for each neuron
+//                connections[i].getBiasWeights()[col] += biasDelta; //not times input
             }
     }
 
@@ -243,14 +250,13 @@ void Network::feedForward() {
         for (int neuronTo= 0; neuronTo < neurons[layerNumber].size(); neuronTo++) {
             double value = 0;
             for (int neuronFrom = 0; neuronFrom < neurons[layerNumber - 1].size(); neuronFrom++) {
-                value += connections[layerNumber - 1].getWeight(neuronFrom, neuronTo) *
+                value += connections[layerNumber - 1].getWeight(neuronTo, neuronFrom) *
                          neurons[layerNumber - 1][neuronFrom].fn;
             }
-            value += value * connections[layerNumber - 1].getBiasWeights()[neuronTo];
-            neurons[layerNumber][neuronTo] = ReLu(value);
-        }
+//            value += value * connections[layerNumber - 1].getBiasWeights()[neuronTo];
 
-    storeErrorTerms();
+            neurons[layerNumber][neuronTo] = sigmoid(value);
+        }
 
 }
 
@@ -293,7 +299,7 @@ void Network::printOutputError() {
 
     std::vector<Neuron>::iterator neuronIter;
     for (neuronIter = neurons[neurons.size() - 1].begin(); neuronIter != neurons[neurons.size() - 1].end(); neuronIter++)
-        cout << neuronIter->errorTerm << endl;
+        cout << neuronIter->errorInformationTerm << endl;
 
     cout << "---------------------------" << endl;
 }

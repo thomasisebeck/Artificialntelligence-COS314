@@ -7,27 +7,27 @@ struct Connection {
 };
 
 class ConnectionRow {
-private:
+public:
     std::vector<std::vector<Connection>> connections;
     std::string layer;
-    int numRows;
-    int numCols;
+    int inputNodesCol_m;
+    int outputNodesRow_j;
     std::vector<double> biasWeights; //added to each node in the calculation
 public:
-    ConnectionRow(int rows, int cols, std::string layer);
+    ConnectionRow(int inputNodes, int outputNodes, std::string layer);
     void printConnections();
-    double getWeight(int row, int col);
-    void setWeight(int row, int col, double weight);
+    double getWeight(int outNodesRowJ, int inNodesColM);
+    void setWeight(int outNodesRowJ, int inNodesColM, double weight);
     std::string getId(int row, int col);
-    int getNumRows();
-    int getNumCols();
+    int getNumInNodesCol_M();
+    int getNumOutNodesRow_J();
     std::vector<double>& getBiasWeights();
 };
 
 struct Neuron {
     double fn;
     double derivative;
-    double errorTerm;
+    double errorInformationTerm;
     double biasErrorTerm;
 };
 

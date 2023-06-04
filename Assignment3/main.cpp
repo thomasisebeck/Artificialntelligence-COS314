@@ -278,23 +278,53 @@ int main() {
 
     try {
 
-        vector<int> topology = {7, 1};
-        Network n(topology, 0.1);
+        vector<int> topology = {2, 1};
+        Network n(topology, 0.25);
+        vector<double> targetVals = {0};
+        vector<double> inputVals = {0, 1};
+        n.setInputVals(inputVals);
+        n.setTargetVals(targetVals);
 
+        n.connections[0].setWeight(0, 0, 1);
+        n.connections[0].setWeight(0, 1, 1);
+        n.connections[0].setWeight(0, 1, 1);
+        n.connections[0].biasWeights = {0};
+//
+//        n.feedForward();
+//        vector<double> outputValues = n.getOutputValues();
+//        cout << outputValues[0] << endl;
+
+        for (int i = 0; i < 2000; i++) {
+
+            n.feedForward();
+            vector<double> outputValues = n.getOutputValues();
+            cout << outputValues[0] << endl;
+            n.resetErrorTerms();
+            n.storeErrorTerms();
+            n.backPropagate();
+            n.correctWeights();
+            n.print();
+        }
+
+
+
+/*
         for (dataInstace d : myInstances) {
 
-            vector<double> inputVals = {
-                    d.age,
-                    d.maturity,
-                    d.maturedBy,
-                    d.weeks,
-                    d.size,
-                    d.side,
-                    d.specificSide
-            };
-            vector<double> targetVals = { d.isMalig };
+//            vector<double> inputVals = {
+//                    d.age,
+//                    d.maturity,
+//                    d.maturedBy,
+//                    d.weeks,
+//                    d.size,
+//                    d.side,
+//                    d.specificSide
+//            };
+//            vector<double> targetVals = { d.isMalig };
 
+            vector<double> inputVals = { 1, 0 };
             n.setInputVals(inputVals);
+            vector<double> targetVals = { 1 };
             n.setTargetVals(targetVals);
             n.feedForward();
             vector<double> outputValues = n.getOutputValues();
@@ -302,13 +332,17 @@ int main() {
             n.storeErrorTerms();
             n.backPropagate();
             n.correctWeights();
-            n.printOutputError();
 
-            cout << "tried to get: " << d.isMalig << endl;
-            cout << "got : " << round(n.getOutputValues()[0]) << endl;
+            cout << "for 1 0 , got " << outputValues[0] << endl;
+
+
+
+            cout << "for 0 1 , got " << outputValues[0] << endl;
+
+
 
         }
-
+*/
     } catch (const char* msg) {
         cout << msg << endl;
     }
