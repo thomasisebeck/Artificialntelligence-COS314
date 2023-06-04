@@ -3,6 +3,7 @@
 #include <fstream>
 #include "Network.h"
 #include <cmath>
+#include <iomanip>
 using namespace std;
 
 //no-recurrence-events,30-39,premeno,30-34,0-2,no,3,left,left_low,no
@@ -342,11 +343,11 @@ int main() {
             n.setTargetVals(testSetOutput[testNumber]);
             n.feedForward();
             vector<double> outputValues = n.getOutputValues();
-            cout << testSetInput[testNumber][0] << " "
-                << testSetInput[testNumber][1] << " "
-                << testSetInput[testNumber][2] << " = "
-                << outputValues[0] << " "
-                << outputValues[1] << endl;
+            cout << round(testSetInput[testNumber][0]) << " "
+                << round(testSetInput[testNumber][1]) << " "
+                << round(testSetInput[testNumber][2]) << " = "
+                << round(outputValues[0]) << " "
+                << round(outputValues[1]) << endl;
         }
 
 
