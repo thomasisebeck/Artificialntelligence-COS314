@@ -46,14 +46,12 @@ public:
     Network(std::vector<int> topology, double alpha);
     void setInputVals(std::vector<double> inputVals);
     void setTargetVals(std::vector<double> targetVals);
-    void testNetwork();
     void print();
-    int getIsMalig();
     std::vector<double >getOutputValues();
     void feedForward();
     void backPropagate();
     void storeErrorTerms();
     void resetErrorTerms();
-    void correctWeights();
+    bool correctWeights();
     void printOutputError();
 };

@@ -94,11 +94,15 @@ Network::Network(vector<int> topology, double alpha) : oldWeights(0,0,"empty") {
 
     this->alpha = alpha;
 
+    ::srand(100); //80.43
+
 }
 
 void Network::setInputVals(const vector<double> inputVals) {
-    if (inputVals.size() != neurons[0].size())
+    if (inputVals.size() != neurons[0].size()) {
+        cout << "invalues: " << inputVals.size() << endl;
         throw "Can't set input values if the size is not that same";
+    }
     this->inputVals = inputVals;
 }
 
@@ -119,13 +123,6 @@ void Network::print() {
             connections[i].printConnections();
     }
 
-}
-
-int Network::getIsMalig() {
-    //see what value is stored on the output layer!
-    if (neurons[0][neurons.size() - 1].fn > 0.5)
-        return 1;
-    return 0;
 }
 
 void Network::printConnectionsAt(int index) {
@@ -192,22 +189,14 @@ void Network::storeErrorTerms() {
         double deriv = neurons[OUT_LAYER_IND][i].derivative;
         double t = targetVals[i];
 
-        cout << "expeted: " << t << endl;
-        cout << "output: " << fn << endl;
-        double error = t - fn;
-        cout << "error: " << error << endl;
-
         // error = prediction - actual
         neurons[OUT_LAYER_IND][i].errorInformationTerm = (t - fn) * deriv;
 
-        cout << "error information term: " << neurons[OUT_LAYER_IND][i].errorInformationTerm << endl;
-
-//        neurons[OUT_LAYER_IND][i].biasErrorTerm =
-//                alpha * neurons[OUT_LAYER_IND][i].errorTerm;
     }
 }
 
-void Network::correctWeights() {
+/*
+ void Network::correctWeights() {
     //loop back from the second last layer
     for (int connNumber = 0; connNumber < connections.size(); connNumber++) {
         //loop through the weights
@@ -220,14 +209,54 @@ void Network::correctWeights() {
                     //j neuron's error term
                     double weightCorrectionTerm = alpha * neurons[connNumber + 1][i].errorInformationTerm * neurons[connNumber][k].fn;
 
-                    cout << "weight correction term: " << weightCorrectionTerm << endl;
-
                     double biasDelta = alpha * neurons[connNumber + 1][i].errorInformationTerm;
 
                     connections[connNumber].setWeight(i, k, previousWeight + weightCorrectionTerm);
                 }
     }
 
+}
+ */
+
+bool Network::correctWeights() {
+
+    double totalWeightAdjustment = 0;
+
+    //loop back from the second last layer
+    for (int connNumber = 0; connNumber < connections.size(); connNumber++)
+        for (int k = 0; k < connections[connNumber].getNumInNodesCol_M(); k++)
+            for (int i = 0; i < connections[connNumber].getNumOutNodesRow_J(); i++) {
+                double previousWeight = connections[connNumber].getWeight(i, k);
+
+                //j neuron's error term
+                double weightCorrectionTerm = alpha * neurons[connNumber + 1][i].errorInformationTerm * neurons[connNumber][k].fn;
+
+                //if it's a hidden layer, multiply by the derivative to get weight corr term
+                if (connNumber != connections.size() - 1) {
+
+                    double Sni = 0;
+                    //get sum of output errors
+                    for (int j = 0; j < neurons[connNumber + 1].size(); j++)
+                        Sni += neurons[connNumber + 1][j].errorInformationTerm * connections[connNumber].getWeight(j, k);
+
+                    //multiply by my activation function and deriv of my activation function
+                    Sni *= neurons[connNumber][k].fn * neurons[connNumber][k].derivative;
+
+                    weightCorrectionTerm = alpha * Sni * neurons[connNumber][k].fn;
+                }
+
+                //cout << weightCorrectionTerm << endl;
+
+                   // this->print();
+
+                connections[connNumber].setWeight(i, k, previousWeight + weightCorrectionTerm);
+
+                totalWeightAdjustment += weightCorrectionTerm;
+            }
+
+    if (totalWeightAdjustment < 0.00000000000000001) //converged
+        return false;
+    return true;
 }
 
 void Network::feedForward() {
@@ -249,36 +278,10 @@ void Network::feedForward() {
                 value += connections[layerNumber - 1].getWeight(neuronTo, neuronFrom) *
                          neurons[layerNumber - 1][neuronFrom].fn;
             }
-//            value += value * connections[layerNumber - 1].getBiasWeights()[neuronTo];
 
             neurons[layerNumber][neuronTo] = sigmoid(value);
         }
 
-}
-
-void Network::testNetwork() {
-    cout << "=================== TESTING NETWORK ====================" << endl;
-
-    cout << "for inputs: ";
-    vector<double>::iterator iter;
-    for (iter = inputVals.begin(); iter != inputVals.end(); iter++)
-        cout << *iter << " ";
-    cout << endl;
-
-    cout << "and target vals: ";
-    for (iter = targetVals.begin(); iter != targetVals.end(); iter++)
-        cout << *iter << " ";
-    cout << endl;
-
-
-    cout << "got output: ";
-    std::vector<Neuron>::iterator neuronIter;
-    for (neuronIter = neurons[neurons.size() - 1].begin(); neuronIter != neurons[neurons.size() - 1].end(); neuronIter++)
-        cout << neuronIter->fn<< " ";
-
-    cout << endl;
-
-    cout << "========================================================" << endl;
 }
 
 std::vector<double> Network::getOutputValues() {
