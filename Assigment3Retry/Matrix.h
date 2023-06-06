@@ -17,6 +17,7 @@ public:
     Matrix mult(Matrix& other);
     Matrix add(Matrix& other);
     Matrix multScaler(double value);
+    Matrix elementWiseMultipy(Matrix& other);
     Matrix addScaler(double value);
     Matrix negate();
     Matrix flipDimensions();

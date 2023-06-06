@@ -2,5 +2,6 @@
 
 enum functionType {
     SIGMOID,
-    RANDOM
+    RANDOM,
+    SIDMOID_DERIV
 };

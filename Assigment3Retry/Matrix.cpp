@@ -104,7 +104,8 @@ Matrix Matrix::operation(functionType type) {
                 out.get(x, y) = (double) rand() / RAND_MAX;
             if (type == SIGMOID)
                 out.get(x, y) = sigmoid(get(x, y));
-
+            if (type == SIDMOID_DERIV)
+                out.get(x, y) = sigmoidDeriv(get(x, y));
         }
 
     return out;
@@ -127,5 +128,19 @@ double Matrix::sigmoid(double x) {
 double Matrix::sigmoidDeriv(double x) {
     //input the result of sigmoid
     return x * (1 - x);
+}
+
+Matrix Matrix::elementWiseMultipy(Matrix &other) {
+    if (this->rows != other.rows || this->cols != other.cols)
+        throw "ele mult dimension mismatch";
+
+    Matrix out(this->cols, this->rows);
+
+    for (int y = 0; y < rows; y++)
+        for (int x = 0; x < cols; x++) {
+            out.get(x, y) = get(x, y) * other.get(x, y);
+        }
+
+    return out;
 }
 

@@ -15,6 +15,8 @@ public:
     void printWeights();
     void printNodes();
     void feedForward(std::vector<double> input);
+    void backProp(std::vector<double> targetOutput);
+    std::vector<double> getOutputValues();
 };
 
 

@@ -40,7 +40,6 @@ void Network::feedForward(std::vector<double> input) {
     //convert input to a matrix of a sigle row
     Matrix currValues(input.size(), 1);
 
-    //copy the values to the matrix
     for (int i = 0; i < input.size(); i++)
         currValues.values[i] = input[i];
 
@@ -61,7 +60,7 @@ void Network::feedForward(std::vector<double> input) {
         currValues = currValues.operation(SIGMOID);
     }
 
-    valuesMatrices[valuesMatrices.size() - 1] = currValues;
+    valuesMatrices[weightMatrices.size()] = currValues;
 
 }
 
@@ -70,5 +69,46 @@ void Network::printNodes() {
         cout << "layer " << i << ": " << valuesMatrices[i].cols << " by  " << valuesMatrices[i].rows << endl;
         valuesMatrices[i].print();
     }
+}
+
+void Network::backProp(vector<double> targetOutput) {
+    if (targetOutput.size() != this->topo.back())
+        throw "Target output incorrect size";
+
+    Matrix outputErrors(targetOutput.size(), 1);
+    outputErrors.values = targetOutput;
+
+    //t - fn
+    Matrix toNegate = valuesMatrices.back().negate();
+    outputErrors = outputErrors.add(toNegate);
+
+    //go back from the last
+    for (int i = weightMatrices.size() - 1; i >= 0; i--) {
+        Matrix toTranspose = weightMatrices[i].flipDimensions();
+        //get the previous error
+        Matrix prevErrors = outputErrors.mult(toTranspose);
+        //store the derivative of the output
+        Matrix derivatives = valuesMatrices[i + 1].operation(SIDMOID_DERIV);
+        //multiply errors with derivatives to get gradients
+        Matrix differences = outputErrors.elementWiseMultipy(derivatives);
+        //alpha * error inf
+        differences = differences.multScaler(alpha);
+        //update using alpha * error * input
+        Matrix weightDifferences = valuesMatrices[i].flipDimensions()
+                .mult(differences);
+        //now add weight differences to the weight
+        weightMatrices[i] = weightMatrices[i].add(weightDifferences);
+        //add the difference to the bias matrix (only alpha and err, not output)
+        biasMatrices[i] = biasMatrices[i].add(differences);
+
+        //to backpropagation
+        // the errors
+        outputErrors = prevErrors;
+    }
+
+}
+
+std::vector<double> Network::getOutputValues() {
+    return valuesMatrices.back().values;
 }
 
