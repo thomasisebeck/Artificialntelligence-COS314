@@ -20,19 +20,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7476f58a-71dd-478b-be4e-a530752c289c" name="Changes" comment="feed fwd working">
-      <change afterPath="$PROJECT_DIR$/Assigment3Retry/Matrix.o" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assigment3Retry/Network.o" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assigment3Retry/main.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_5_30_2023_7_35_AM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_5_30_2023_7_35_AM__Changes_.xml" beforeDir="false" />
+    <list default="true" id="7476f58a-71dd-478b-be4e-a530752c289c" name="Changes" comment="works with training xor">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assigment3Retry/Matrix.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Assigment3Retry/Matrix.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assigment3Retry/Matrix.h" beforeDir="false" afterPath="$PROJECT_DIR$/Assigment3Retry/Matrix.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assigment3Retry/Network.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Assigment3Retry/Network.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assigment3Retry/Network.h" beforeDir="false" afterPath="$PROJECT_DIR$/Assigment3Retry/Network.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assigment3Retry/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Assigment3Retry/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assigment3Retry/sharedTypes.h" beforeDir="false" afterPath="$PROJECT_DIR$/Assigment3Retry/sharedTypes.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assignment3/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Assignment3/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +131,7 @@
       <workItem from="1685803340888" duration="11009000" />
       <workItem from="1685820622632" duration="17031000" />
       <workItem from="1686066534384" duration="10006000" />
-      <workItem from="1686082585822" duration="9804000" />
+      <workItem from="1686082585822" duration="18400000" />
     </task>
     <task id="LOCAL-00001" summary="Checkpoint before adding runtime">
       <created>1680902992149</created>
@@ -357,7 +350,14 @@
       <option name="project" value="LOCAL" />
       <updated>1686089629630</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="works with training xor">
+      <created>1686092834259</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1686092834259</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -365,7 +365,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Started A2" />
     <MESSAGE value="added textfiles" />
     <MESSAGE value="fixed text file reading" />
     <MESSAGE value="mutation started" />
@@ -390,6 +389,7 @@
     <MESSAGE value="added GP" />
     <MESSAGE value="updated main a shared" />
     <MESSAGE value="feed fwd working" />
-    <option name="LAST_COMMIT_MESSAGE" value="feed fwd working" />
+    <MESSAGE value="works with training xor" />
+    <option name="LAST_COMMIT_MESSAGE" value="works with training xor" />
   </component>
 </project>

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <vector>
+#include <fstream>
 #include "Matrix.h"
 
 class Network {
@@ -17,6 +18,8 @@ public:
     void feedForward(std::vector<double> input);
     void backProp(std::vector<double> targetOutput);
     std::vector<double> getOutputValues();
+    void storeWeights();
+    void loadWeights();
 };
 
 

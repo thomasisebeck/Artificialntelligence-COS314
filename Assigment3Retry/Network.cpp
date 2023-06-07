@@ -1,5 +1,8 @@
 #include "Network.h"
 #include <iostream>
+#include <iomanip>
+#include <limits>
+
 using namespace std;
 
 Network::Network(std::vector<int> topology, double alpha) {
@@ -110,5 +113,41 @@ void Network::backProp(vector<double> targetOutput) {
 
 std::vector<double> Network::getOutputValues() {
     return valuesMatrices.back().values;
+}
+
+string doubleToText(double d) {
+    std::stringstream ss;
+    ss << std::setprecision( 20 );
+    ss << d << endl;
+    return ss.str();
+}
+
+void Network::storeWeights() {
+    ofstream myFile("storage.txt");
+
+    for (int i = 0; i < weightMatrices.size(); i++)
+        for (int x = 0; x < weightMatrices[i].rows; x++)
+            for (int y = 0; y < weightMatrices[i].cols; y++) {
+                myFile << doubleToText(weightMatrices[i].get(x, y));
+                cout << setprecision(20) << weightMatrices[i].get(x, y) << endl;
+            }
+
+    myFile.close();
+}
+
+void Network::loadWeights() {
+    ifstream myFile("storage.txt");
+    string line;
+
+    for (int i = 0; i < weightMatrices.size(); i++)
+        for (int x = 0; x < weightMatrices[i].rows; x++)
+            for (int y = 0; y < weightMatrices[i].cols; y++) {
+                double d;
+                myFile >> d;
+                cout << d << endl;
+                weightMatrices[i].get(x, y) = d;
+            }
+
+    myFile.close();
 }
 
