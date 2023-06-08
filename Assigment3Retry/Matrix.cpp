@@ -42,15 +42,22 @@ Matrix Matrix::mult(Matrix &other) {
     return out;
 }
 
-Matrix Matrix::add(Matrix &other) {
+Matrix Matrix::add(Matrix &other, bool& converged) {
     if (this->rows != other.rows || this->cols != other.cols)
         throw "add dimension mismatch";
 
     Matrix out(this->cols, this->rows);
 
+    double total = 0;
+
     for (int row_y = 0; row_y < out.rows; row_y++)
-        for (int col_x = 0; col_x < out.cols; col_x++)
+        for (int col_x = 0; col_x < out.cols; col_x++) {
             out.get(col_x, row_y) = get(col_x, row_y) + other.get(col_x, row_y);
+            total += other.get(col_x, row_y);
+        }
+
+    if (total < 0.0000000001)
+        converged = true;
 
     return out;
 }

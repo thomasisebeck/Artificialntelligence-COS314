@@ -285,15 +285,22 @@ vector<dataInstace> readInstances() {
 }
 
 void largerNetwork() {
+
+    unsigned int seed = time(0);
+    cout << setprecision(100) << seed << endl;
+
+    //1686126641 =
+
     vector<dataInstace> myInstances = readInstances();
     shuffle(myInstances);
 
-    vector<int> topology = {22, 10, 2}; //-> 97%
-    Network n(topology, 0.05);
+    vector<int> topology = {22, 12, 4, 2}; //71
+    Network n(topology, 0.08, 8458); //73
 
     cout << "training..." << endl;
 
-    const int TRAINING_ITERATIONS = 300;
+    const int TRAINING_SET = myInstances.size() * 0.75;
+    const int TEST_SET = myInstances.size() - TRAINING_SET;
 
     int total = 0;
     int correct = 0;
@@ -303,56 +310,62 @@ void largerNetwork() {
     int TN = 0;
     int FN = 0;
 
-    n.loadWeights();
+    //loading weights does not work!
+    //never converges
+    //n.loadWeights();
     bool converged = false;
 
     try {
 
-        for (int i = 0; i < TRAINING_ITERATIONS; i++) {
+        for (int iterations = 0; iterations < 3; iterations++)
+            for (int i = TEST_SET; i < myInstances.size(); i++) {
 
-            if (converged) {
-                cout << "Network weights converged" << endl;
-                break;
-            }
+                if (converged) {
+                    cout << "Network weights converged" << endl;
+                    break;
+                }
 
-            cout << "iteration " << i << " of " << TRAINING_ITERATIONS << endl;
-            //n.printWeights();
+                cout << "iteration " << (i - TEST_SET) * (iterations + 1) << " of " << (myInstances.size() - TEST_SET) * 5 << endl;
 
-            for (int outer = 0; outer < myInstances.size() - 6; outer++) {
+                bool converged = false;
 
-                for (int loopOver = 0; loopOver < 20; loopOver++) {
+                for (int outer = TEST_SET; outer < myInstances.size() - 6; outer++) {
 
-                    for (int inner = 0; inner < 5; inner++) {
+                    for (int loopOver = 0; loopOver < 3; loopOver++) {
 
-                        vector<vector<int>> inputVals = {
-                                myInstances[outer + inner + (outer % 2)].recurrent,
-                                myInstances[outer + inner + (outer % 2)].age,
-                                myInstances[outer + inner + (outer % 2)].maturity,
-                                myInstances[outer + inner + (outer % 2)].maturedBy,
-                                myInstances[outer + inner + (outer % 2)].weeks,
-                                myInstances[outer + inner + (outer % 2)].size,
-                                myInstances[outer + inner + (outer % 2)].side,
-                                myInstances[outer + inner + (outer % 2)].specificSide,
-                                myInstances[outer + inner + (outer % 2)].isMalig
-                        };
+                        for (int inner = 0; inner < 5; inner++) {
 
-                        //bild the target vals array
-                        vector<double> useInputVals;
-                        for (int i = 0; i < inputVals.size(); i++)
-                            for (int j = 0; j < inputVals[i].size(); j++)
-                                useInputVals.push_back(inputVals[i][j]);
+                            vector<vector<int>> inputVals = {
+                                    myInstances[outer + inner + (outer % 2)].recurrent,
+                                    myInstances[outer + inner + (outer % 2)].age,
+                                    myInstances[outer + inner + (outer % 2)].maturity,
+                                    myInstances[outer + inner + (outer % 2)].maturedBy,
+                                    myInstances[outer + inner + (outer % 2)].weeks,
+                                    myInstances[outer + inner + (outer % 2)].size,
+                                    myInstances[outer + inner + (outer % 2)].side,
+                                    myInstances[outer + inner + (outer % 2)].specificSide,
+                                    myInstances[outer + inner + (outer % 2)].isMalig
+                            };
 
-                        vector<double> targetVals;
-                        if (myInstances[outer + inner + (outer % 2)].positive[0] == 0)
-                            targetVals = {0, 1};
-                        else
-                            targetVals = {1, 0};
+                            //bild the target vals array
+                            vector<double> useInputVals;
+                            for (int i = 0; i < inputVals.size(); i++)
+                                for (int j = 0; j < inputVals[i].size(); j++)
+                                    useInputVals.push_back(inputVals[i][j]);
+
+                            vector<double> targetVals;
+                            if (myInstances[outer + inner + (outer % 2)].positive[0] == 0)
+                                targetVals = {0, 1};
+                            else
+                                targetVals = {1, 0};
 
 
-                        n.feedForward(useInputVals);
-                        vector<double> outputValues = n.getOutputValues();
-                        n.backProp(targetVals);
+                            n.feedForward(useInputVals);
+                            vector<double> outputValues = n.getOutputValues();
+                            if (n.backProp(targetVals)) //converged
+                                converged = true;
 
+                        }
 
                     }
 
@@ -360,21 +373,19 @@ void largerNetwork() {
 
             }
 
-        }
-
         //test the accuracy
 
-        for (dataInstace d : myInstances) {
+        for (int i = 0; i < TEST_SET; i++) {
             vector<vector<int>> inputVals = {
-                    d.recurrent,
-                    d.age,
-                    d.maturity,
-                    d.maturedBy,
-                    d.weeks,
-                    d.size,
-                    d.side,
-                    d.specificSide,
-                    d.isMalig
+                    myInstances[i].recurrent,
+                    myInstances[i].age,
+                    myInstances[i].maturity,
+                    myInstances[i].maturedBy,
+                    myInstances[i].weeks,
+                    myInstances[i].size,
+                    myInstances[i].side,
+                    myInstances[i].specificSide,
+                    myInstances[i].isMalig
             };
 
             //bild the target vals array
@@ -384,7 +395,7 @@ void largerNetwork() {
                     useInputVals.push_back(inputVals[i][j]);
 
             vector<double> targetVals;
-            if (d.positive[0] == 0)
+            if (myInstances[i].positive[0] == 0)
                 targetVals = {0, 1};
             else
                 targetVals = {1, 0};
@@ -397,13 +408,13 @@ void largerNetwork() {
             if (round(outputValues[0]) == targetVals[0]) {
                 correct++;
                 //increase true counter
-                if (d.positive[0] == 0)
+                if (myInstances[i].positive[0] == 0)
                     TP++;
                 else
                     TN++;
             } else {
                 //increase false counter
-                if (d.positive[0] == 1)
+                if (myInstances[i].positive[0] == 1)
                     FP++;
                 else
                     FN++;
@@ -414,7 +425,6 @@ void largerNetwork() {
         cout << "storing..." << endl;
         n.storeWeights();
         cout << "done..." << endl;
-
 
 
 

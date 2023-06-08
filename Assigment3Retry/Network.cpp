@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Network::Network(std::vector<int> topology, double alpha) {
+Network::Network(std::vector<int> topology, double alpha, unsigned int SEED) {
     this->topo = topology;
     this->weightMatrices = {};
     this->valuesMatrices = {};
@@ -46,6 +46,8 @@ void Network::feedForward(std::vector<double> input) {
     for (int i = 0; i < input.size(); i++)
         currValues.values[i] = input[i];
 
+    bool placeholder;
+
     //do the feedforward
     for (int i = 0; i < weightMatrices.size(); i++){
         //connections will be n - 1 layers
@@ -57,7 +59,7 @@ void Network::feedForward(std::vector<double> input) {
         currValues = currValues.mult(weightMatrices[i]);
 
         //add the bias for the row
-        currValues = currValues.add(biasMatrices[i]);
+        currValues = currValues.add(biasMatrices[i], placeholder);
 
         //activate the neurons
         currValues = currValues.operation(SIGMOID);
@@ -74,16 +76,18 @@ void Network::printNodes() {
     }
 }
 
-void Network::backProp(vector<double> targetOutput) {
+bool Network::backProp(vector<double> targetOutput) {
     if (targetOutput.size() != this->topo.back())
         throw "Target output incorrect size";
 
     Matrix outputErrors(targetOutput.size(), 1);
     outputErrors.values = targetOutput;
 
+    bool converged = false;
+    bool placeholder;
     //t - fn
     Matrix toNegate = valuesMatrices.back().negate();
-    outputErrors = outputErrors.add(toNegate);
+    outputErrors = outputErrors.add(toNegate, placeholder);
 
     //go back from the last
     for (int i = weightMatrices.size() - 1; i >= 0; i--) {
@@ -99,15 +103,19 @@ void Network::backProp(vector<double> targetOutput) {
         //update using alpha * error * input
         Matrix weightDifferences = valuesMatrices[i].flipDimensions()
                 .mult(differences);
+
+        converged = false;
         //now add weight differences to the weight
-        weightMatrices[i] = weightMatrices[i].add(weightDifferences);
+        weightMatrices[i] = weightMatrices[i].add(weightDifferences, converged);
         //add the difference to the bias matrix (only alpha and err, not output)
-        biasMatrices[i] = biasMatrices[i].add(differences);
+        biasMatrices[i] = biasMatrices[i].add(differences, placeholder);
 
         //to backpropagation
         // the errors
         outputErrors = prevErrors;
     }
+
+    return converged;
 
 }
 
