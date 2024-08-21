@@ -1,0 +1,97 @@
+Index: Assignment2/Genetic.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#pragma once\r\n#include <vector>\r\n#include <list>\r\n#include \"Knapsack.h\"\r\n#include \"RouletteWheel.h\"\r\n\r\nclass Genetic: public Knapsack {\r\nprivate:\r\n    std::vector< std::vector<bool> > offspring;\r\n    std::vector<int> crossoverIndices;\r\n    int numCrossover;\r\n    int tournamentSize;\r\n    float mutationRate;\r\npublic:\r\n    Genetic(std::vector<Item> items, int totalWeight, int populationSize, float crossoverDecimal, float mutationRate, int tournamentSize);\r\n    int getFitness(const std::vector<bool> bistring);\r\n    void crossOver();\r\n    void printPopulation();\r\n    void mutate();\r\n    void selection();\r\n    void printBistring(vector<bool> bistring);\r\n};
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Assignment2/Genetic.h b/Assignment2/Genetic.h
+--- a/Assignment2/Genetic.h	(revision 1c0a99bada026d6b3426b29d74934944fd159b86)
++++ b/Assignment2/Genetic.h	(date 1683533617335)
+@@ -2,7 +2,6 @@
+ #include <vector>
+ #include <list>
+ #include "Knapsack.h"
+-#include "RouletteWheel.h"
+ 
+ class Genetic: public Knapsack {
+ private:
+Index: Assignment2/main.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#include <iostream>\r\n#include <fstream>\r\n#include <vector>\r\n#include \"sharedTypes.h\"\r\n#include \"Genetic.h\"\r\n#include \"RouletteWheel.h\"\r\nusing namespace std;\r\n\r\nvoid testInstance(problemInstance instance, testType type) {\r\n\r\n    const int POPULATION_SIZE = 10;\r\n    const float CROSSOVER_RATE = 0.7;\r\n    const float MUTATION_RATE = 0.1;\r\n    const int TOURNAMENT_SIZE = POPULATION_SIZE * 0.6;\r\n    const int NUMBER_OF_GENERATIONS = 500;\r\n\r\n    cout << \"Testing instance\" << endl;\r\n    cout << \"Items: \" << endl;\r\n    for (Item i: instance.items)\r\n        cout << i.weight << \" \" << i.value << endl;\r\n\r\n    switch (type) {\r\n        case GENETIC:\r\n            //create a genetic class\r\n            Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,\r\n                        CROSSOVER_RATE, MUTATION_RATE, TOURNAMENT_SIZE);\r\n\r\n            cout << \"initial: \" << endl;\r\n            gen.printPopulation();\r\n\r\n            for (int i = 0; i < NUMBER_OF_GENERATIONS; i++) {\r\n                gen.crossOver();\r\n                gen.selection();\r\n                gen.mutate();\r\n\r\n                cout << \"after mutation: \" << endl;\r\n                gen.printPopulation();\r\n            }\r\n\r\n            break;\r\n    }\r\n}\r\n\r\nstruct fileType {\r\n    string filename;\r\n    double optimum;\r\n};\r\n\r\nint main() {\r\n\r\n    vector<fileType> fileVector {\r\n            { \"Instances/f1_l-d_kp_10_269\", 295},\r\n           /* { \"Instances/f2_l-d_kp_20_878\", 1024},\r\n            { \"Instances/f3_l-d_kp_4_20\", 35},\r\n            { \"Instances/f4_l-d_kp_4_11\", 23},\r\n            { \"Instances/f5_l-d_kp_15_375\", 481.0694},\r\n            { \"Instances/f6_l-d_kp_10_60\", 52},\r\n            { \"Instances/f7_l-d_kp_7_50\", 107},\r\n            { \"Instances/knapPI_1_100_1000_1\", 9147},\r\n            { \"Instances/f8_l-d_kp_23_10000\", 9767},\r\n            { \"Instances/f9_l-d_kp_5_80\", 130},\r\n            { \"Instances/f10_l-d_kp_20_879\", 1025},*/\r\n    };\r\n\r\n    vector<int> items;\r\n\r\n    for (fileType file: fileVector) {\r\n        //clear vector\r\n        items.clear();\r\n\r\n        ifstream myFile(file.filename);\r\n\r\n        //init the name and optimum\r\n        problemInstance instance;\r\n        instance.name = file.filename;\r\n        instance.optimum = file.optimum;\r\n\r\n        string line;\r\n\r\n        //get first line: <no lines> <capacity>\r\n        getline(myFile, line);\r\n\r\n        //get the capacity\r\n        line.erase(0, line.find(' ') + 1);\r\n        instance.capacity = stoi(line);\r\n\r\n\r\n        //load the values into the vector\r\n        while (getline(myFile, line)) {\r\n            Item newItem;\r\n            newItem.value = stoi(line.substr(0, line.find(' ')));\r\n            line.erase(0, line.find(' ') + 1);\r\n            newItem.weight = stoi(line);\r\n            instance.items.push_back(newItem);\r\n        }\r\n\r\n        myFile.close();\r\n\r\n        //test\r\n        testInstance(instance, GENETIC);\r\n\r\n    }\r\n\r\n\r\n    return 0;\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Assignment2/main.cpp b/Assignment2/main.cpp
+--- a/Assignment2/main.cpp	(revision 1c0a99bada026d6b3426b29d74934944fd159b86)
++++ b/Assignment2/main.cpp	(date 1683533617312)
+@@ -3,7 +3,6 @@
+ #include <vector>
+ #include "sharedTypes.h"
+ #include "Genetic.h"
+-#include "RouletteWheel.h"
+ using namespace std;
+ 
+ void testInstance(problemInstance instance, testType type) {
+Index: Assignment2/RouletteWheel.h
+===================================================================
+diff --git a/Assignment2/RouletteWheel.h b/Assignment2/RouletteWheel.h
+deleted file mode 100644
+--- a/Assignment2/RouletteWheel.h	(revision 1c0a99bada026d6b3426b29d74934944fd159b86)
++++ /dev/null	(revision 1c0a99bada026d6b3426b29d74934944fd159b86)
+@@ -1,37 +0,0 @@
+-#pragma once
+-#include <vector>
+-#include <random>
+-#include <ctime>
+-
+-
+-class RouletteWheel {
+-    std::vector<int> fitnesses;
+-    int sum;
+-public:
+-    RouletteWheel(std::vector<int> fitnesses) {
+-        this->fitnesses = fitnesses;
+-
+-        this->sum = 0;
+-
+-        std::vector<int>::iterator iter;
+-        for (iter = fitnesses.begin(); iter != fitnesses.end(); iter++)
+-            sum += *iter;
+-
+-        srand(time(NULL));
+-    }
+-
+-    int spinAndGetIndex() {
+-        //random number between 0 and tournament size
+-        float r = rand() / static_cast<float>(RAND_MAX);
+-         r *= sum;
+-
+-         //see where r lies
+-         for (int i = 0; i < fitnesses.size(); i++) {
+-             r -= fitnesses[i];
+-             if (r <= 0)
+-                 return i;
+-         }
+-
+-         return 0;
+-    }
+-};
+\ No newline at end of file
+Index: CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>cmake_minimum_required(VERSION 3.24)\r\nproject(COS314)\r\n\r\nset(CMAKE_CXX_STANDARD 14)\r\n\r\ninclude_directories(Assignment1)\r\n\r\nadd_executable(COS314\r\n        Assignment2/Genetic.h\r\n        Assignment2/Genetic.cpp\r\n        Assignment2/Knapsack.h\r\n        Assignment2/Knapsack.cpp\r\n        Assignment2/main.cpp\r\n        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	(revision 1c0a99bada026d6b3426b29d74934944fd159b86)
++++ b/CMakeLists.txt	(date 1683533617370)
+@@ -11,4 +11,4 @@
+         Assignment2/Knapsack.h
+         Assignment2/Knapsack.cpp
+         Assignment2/main.cpp
+-        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h)
++        Assignment2/sharedTypes.h Assignment2/Genetic.cpp)

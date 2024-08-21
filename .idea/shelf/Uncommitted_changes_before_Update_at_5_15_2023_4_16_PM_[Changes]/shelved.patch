@@ -1,0 +1,419 @@
+Index: Assignment2/main.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#include <iostream>\r\n#include <fstream>\r\n#include <vector>\r\n#include \"sharedTypes.h\"\r\n#include \"Genetic.h\"\r\nusing namespace std;\r\n\r\nvoid testInstance(problemInstance instance, testType type) {\r\n\r\n    const int POPULATION_SIZE = 50;\r\n\r\n    //must be even\r\n    const float CROSSOVER_RATE = 0.8;\r\n    const float MUTATION_RATE = 0.4;\r\n    const int TOURNAMENT_SIZE = 8;\r\n    const int NUMBER_OF_GENERATIONS = 25;\r\n    const int NUMBER_OF_RUNS = 10;\r\n    vector<bool> bestIndividual = {};\r\n\r\n    switch (type) {\r\n        case GENETIC:\r\n\r\n            cout << \"Genetic: \" << instance.name << endl;\r\n\r\n            for (int i = 0; i < NUMBER_OF_RUNS; i++) {\r\n\r\n                //create a genetic class\r\n                Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,\r\n                            CROSSOVER_RATE, MUTATION_RATE, TOURNAMENT_SIZE);\r\n\r\n                for (int i = 0; i < NUMBER_OF_GENERATIONS; i++) {\r\n                    gen.crossOver();\r\n                    gen.tournamentSelection();\r\n                    gen.mutate();\r\n                    if (bestIndividual.empty() || gen.getFitness(bestIndividual) < gen.getFitness(gen.getBest()))\r\n                        bestIndividual = gen.getBest();\r\n                }\r\n\r\n                if (i == NUMBER_OF_RUNS - 1) {\r\n                    cout << \"Best individual: \";\r\n                    gen.printBistring(bestIndividual);\r\n                    cout << \"Best fitness: \" << gen.getFitness(bestIndividual) << endl;\r\n                    cout << \"Optimum: \" << instance.optimum << endl;\r\n                }\r\n\r\n            }\r\n\r\n            break;\r\n\r\n        case ACO:\r\n\r\n            cout << \"ACO: \" << instance.name << endl;\r\n\r\n    }\r\n}\r\n\r\nstruct fileType {\r\n    string filename;\r\n    double optimum;\r\n};\r\n\r\nint main() {\r\n\r\n    vector<fileType> fileVector {\r\n            { \"Instances/f1_l-d_kp_10_269\", 295},\r\n            { \"Instances/f2_l-d_kp_20_878\", 1024},\r\n            { \"Instances/f3_l-d_kp_4_20\", 35},\r\n            { \"Instances/f4_l-d_kp_4_11\", 23},\r\n            { \"Instances/f5_l-d_kp_15_375\", 481.0694},\r\n            { \"Instances/f6_l-d_kp_10_60\", 52},\r\n            { \"Instances/f7_l-d_kp_7_50\", 107},\r\n            { \"Instances/knapPI_1_100_1000_1\", 9147},\r\n            { \"Instances/f8_l-d_kp_23_10000\", 9767},\r\n            { \"Instances/f9_l-d_kp_5_80\", 130},\r\n            { \"Instances/f10_l-d_kp_20_879\", 1025},\r\n    };\r\n\r\n    vector<int> items;\r\n\r\n    for (fileType file: fileVector) {\r\n        //clear vector\r\n        items.clear();\r\n\r\n        ifstream myFile(file.filename);\r\n\r\n        //init the name and optimum\r\n        problemInstance instance;\r\n        instance.name = file.filename;\r\n        instance.optimum = file.optimum;\r\n\r\n        string line;\r\n\r\n        //get first line: <no lines> <capacity>\r\n        getline(myFile, line);\r\n\r\n        //get the capacity\r\n        line.erase(0, line.find(' ') + 1);\r\n        instance.capacity = stoi(line);\r\n\r\n\r\n        //load the values into the vector\r\n        while (getline(myFile, line)) {\r\n            Item newItem;\r\n            newItem.value = stoi(line.substr(0, line.find(' ')));\r\n            line.erase(0, line.find(' ') + 1);\r\n            newItem.weight = stoi(line);\r\n            instance.items.push_back(newItem);\r\n        }\r\n\r\n        myFile.close();\r\n\r\n        //test\r\n        testInstance(instance, GENETIC);\r\n\r\n    }\r\n\r\n\r\n    return 0;\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Assignment2/main.cpp b/Assignment2/main.cpp
+--- a/Assignment2/main.cpp	
++++ b/Assignment2/main.cpp	
+@@ -3,26 +3,30 @@
+ #include <vector>
+ #include "sharedTypes.h"
+ #include "Genetic.h"
++#include "ACO.h"
+ using namespace std;
+ 
+ void testInstance(problemInstance instance, testType type) {
+ 
++    //GENETIC
+     const int POPULATION_SIZE = 50;
+-
+-    //must be even
+-    const float CROSSOVER_RATE = 0.8;
++    const float CROSSOVER_RATE = 0.8; //must be even
+     const float MUTATION_RATE = 0.4;
+     const int TOURNAMENT_SIZE = 8;
+     const int NUMBER_OF_GENERATIONS = 25;
+-    const int NUMBER_OF_RUNS = 10;
++    const int NUMBER_OF_RUNS_GEN = 10;
+     vector<bool> bestIndividual = {};
+ 
++    //ACO
++    const float PHEREMONES_TO_DEPOSIT = 0.5;
++    const int NUMBER_OF_RUNS_ACO = 5000;
++
+     switch (type) {
+         case GENETIC:
+ 
+             cout << "Genetic: " << instance.name << endl;
+ 
+-            for (int i = 0; i < NUMBER_OF_RUNS; i++) {
++            for (int i = 0; i < NUMBER_OF_RUNS_GEN; i++) {
+ 
+                 //create a genetic class
+                 Genetic gen(instance.items, instance.capacity, POPULATION_SIZE,
+@@ -36,7 +40,7 @@
+                         bestIndividual = gen.getBest();
+                 }
+ 
+-                if (i == NUMBER_OF_RUNS - 1) {
++                if (i == NUMBER_OF_RUNS_GEN - 1) {
+                     cout << "Best individual: ";
+                     gen.printBistring(bestIndividual);
+                     cout << "Best fitness: " << gen.getFitness(bestIndividual) << endl;
+@@ -47,10 +51,21 @@
+ 
+             break;
+ 
+-        case ACO:
++        case ANT:
+ 
+             cout << "ACO: " << instance.name << endl;
++            ACO aco(instance.capacity, PHEREMONES_TO_DEPOSIT, instance.items);
++
++            for (int i = 0; i < NUMBER_OF_RUNS_ACO; i++) {
++                try {
++                    aco.travelRoute();
++                } catch (const char* msg) {
++                    cout << "Error: " << msg << endl;
++                }
+ 
++            }
++
++            aco.getFinalSolution();
+     }
+ }
+ 
+@@ -110,7 +125,7 @@
+         myFile.close();
+ 
+         //test
+-        testInstance(instance, GENETIC);
++        testInstance(instance, ANT);
+ 
+     }
+ 
+Index: Assignment2/ACO.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#pragma once\r\n#include \"sharedTypes.h\"\r\n#include <string>\r\n#include <algorithm>\r\n\r\n//all edges are connected!\r\n//only thing you have to account for is the pheremone level\r\nstruct Edge {\r\n    float pheromoneLevel;\r\n};\r\n\r\nclass ACO {\r\n    //2d array of items to connect\r\n    std::vector< std::vector<Edge> > edges;\r\n    std::vector<Item> items;\r\n    std::vector<int> indices;\r\n\r\n    //eg: edge[0][1], is between item 0 and 1\r\n\r\n    ACO(int numberOfItems, std::vector<Item> items) {\r\n\r\n        Edge e;\r\n        e.pheromoneLevel = 1;\r\n\r\n        //initialise the vector (2d array of connections)\r\n        for (int i = 0; i < numberOfItems; i++)\r\n            for (int j = 0; j < numberOfItems; j++) {\r\n                edges[i][j] = e;\r\n            }\r\n\r\n        this->items = items;\r\n\r\n        for (int i = 0; i < items.size(); i++)\r\n            indices.push_back(i);\r\n\r\n        srand (static_cast <unsigned> (time(0)));\r\n    }\r\n\r\n    int getItemIndex(Item i, std::vector<Item> items) {\r\n        int index = 0;\r\n        std::vector<Item>::iterator iter;\r\n        for (iter = items.begin(); iter != items.end(); iter++, index++)\r\n            if (iter->value == i.value && iter->weight == i.weight)\r\n                return index;\r\n        return -1;\r\n    }\r\n\r\n    int getNextItemToVisit(Item i, vector<int> visitedItems) {\r\n        //get sum of pheromones on the edges\r\n        int index = getItemIndex(i, this->items);\r\n        vector<Edge> possibleEdges;\r\n\r\n        //get the sum of the pheromone levels and push the possible edges\r\n        int sum = 0;\r\n        for (Edge e : edges[index]) {\r\n            auto it = std::find(visitedItems.begin(), visitedItems.end(), index);\r\n            if (it == visitedItems.end()) { //not visited, possible to visit\r\n                sum += e.pheromoneLevel;\r\n                possibleEdges.push_back(e);\r\n            }\r\n        }\r\n\r\n        //random number from 0 to sum\r\n        float randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/sum);\r\n\r\n        //subtract until you choose the edge\r\n        for (Edge e: possibleEdges) {\r\n            randomNumber -= e.pheromoneLevel;\r\n            if (randomNumber <= 0)\r\n                return e;\r\n        }\r\n\r\n        throw \"Could not find edge!\";\r\n    }\r\n\r\n    int getEdgeIndex(Edge e) {\r\n        std::vector< std::vector<Edge> >::iterator iter;\r\n        for (int i = 0; i < edges.size(); i++)\r\n            if (i == )\r\n    }\r\n\r\n\r\n    void travelRoute() {\r\n        //get a random starting point\r\n        int itemStart = rand() % items.size();\r\n        vector<int> visitedItems;\r\n        visitedItems.push_back(itemStart);\r\n\r\n        //travel the route and keep track of visited items\r\n\r\n\r\n        //if the route is valid, deposit on\r\n\r\n\r\n    }\r\n\r\n\r\n};\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Assignment2/ACO.h b/Assignment2/ACO.h
+--- a/Assignment2/ACO.h	
++++ b/Assignment2/ACO.h	
+@@ -6,93 +6,30 @@
+ //all edges are connected!
+ //only thing you have to account for is the pheremone level
+ struct Edge {
+-    float pheromoneLevel;
++  float pheromoneLevel;
++  int id;
+ };
+ 
+ class ACO {
++private:
+     //2d array of items to connect
+     std::vector< std::vector<Edge> > edges;
+     std::vector<Item> items;
+     std::vector<int> indices;
+ 
++    float totalWeight;
++    float pheremonesToDeposit;
++    float bestValue;
++    string bestSolution;
+     //eg: edge[0][1], is between item 0 and 1
+ 
+-    ACO(int numberOfItems, std::vector<Item> items) {
+-
+-        Edge e;
+-        e.pheromoneLevel = 1;
+-
+-        //initialise the vector (2d array of connections)
+-        for (int i = 0; i < numberOfItems; i++)
+-            for (int j = 0; j < numberOfItems; j++) {
+-                edges[i][j] = e;
+-            }
+-
+-        this->items = items;
+-
+-        for (int i = 0; i < items.size(); i++)
+-            indices.push_back(i);
+-
+-        srand (static_cast <unsigned> (time(0)));
+-    }
+-
+-    int getItemIndex(Item i, std::vector<Item> items) {
+-        int index = 0;
+-        std::vector<Item>::iterator iter;
+-        for (iter = items.begin(); iter != items.end(); iter++, index++)
+-            if (iter->value == i.value && iter->weight == i.weight)
+-                return index;
+-        return -1;
+-    }
+-
+-    int getNextItemToVisit(Item i, vector<int> visitedItems) {
+-        //get sum of pheromones on the edges
+-        int index = getItemIndex(i, this->items);
+-        vector<Edge> possibleEdges;
+-
+-        //get the sum of the pheromone levels and push the possible edges
+-        int sum = 0;
+-        for (Edge e : edges[index]) {
+-            auto it = std::find(visitedItems.begin(), visitedItems.end(), index);
+-            if (it == visitedItems.end()) { //not visited, possible to visit
+-                sum += e.pheromoneLevel;
+-                possibleEdges.push_back(e);
+-            }
+-        }
+-
+-        //random number from 0 to sum
+-        float randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/sum);
+-
+-        //subtract until you choose the edge
+-        for (Edge e: possibleEdges) {
+-            randomNumber -= e.pheromoneLevel;
+-            if (randomNumber <= 0)
+-                return e;
+-        }
+-
+-        throw "Could not find edge!";
+-    }
+-
+-    int getEdgeIndex(Edge e) {
+-        std::vector< std::vector<Edge> >::iterator iter;
+-        for (int i = 0; i < edges.size(); i++)
+-            if (i == )
+-    }
+-
+-
+-    void travelRoute() {
+-        //get a random starting point
+-        int itemStart = rand() % items.size();
+-        vector<int> visitedItems;
+-        visitedItems.push_back(itemStart);
+-
+-        //travel the route and keep track of visited items
+-
++    int getItemIndex(Item i);
++    vector<int> getEdgeIndices(Edge e);
++    vector<int> getNextEdgesToVisit(int itemIndex, vector<int> itemsToVisit);
+ 
+-        //if the route is valid, deposit on
+-
+-
+-    }
+-
+-
++public:
++    ACO(float totalWeight, float pheremonesToDeposit, std::vector<Item> items);
++    void travelRoute();
++    void printGraph();
++    void getFinalSolution();
+ };
+Index: Assignment2/ACO.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Assignment2/ACO.cpp b/Assignment2/ACO.cpp
+new file mode 100644
+--- /dev/null	
++++ b/Assignment2/ACO.cpp	
+@@ -0,0 +1,186 @@
++#include "ACO.h"
++#include <iostream>
++using namespace std;
++
++
++int ACO::getItemIndex(Item i) {
++
++    int index = 0;
++    vector<Item>::iterator iter;
++    for (iter = items.begin(); iter != items.end(); iter++, index++)
++        if (iter->value == i.value && iter->weight == i.weight)
++            return index;
++
++    throw "could not get item index";
++}
++
++vector<int> ACO::getEdgeIndices(Edge e) {
++    for (int i = 0; i < edges.size(); i++)
++        for (int j = 0; j < edges.size(); j++)
++            if (edges[i][j].id == e.id)
++                return vector<int>{i, j};
++    //not found
++    throw "could not find edge indices";
++}
++
++vector<int> ACO::getNextEdgesToVisit(int itemIndex, vector<int> itemsToVisit) {
++    //returns a pair of indices (x, y, x, y...)
++    //get sum of pheromones on the edges
++
++    vector<Edge> possibleEdges;
++
++    //get the sum of the pheromone levels and push the possible edges
++    int sum = 0;
++    int useIndex = 0;
++    for (Edge e : edges[itemIndex]) {
++
++        //get the item index associated with the edge
++        vector<int> edgeIndices = getEdgeIndices(e);
++        if (itemIndex == edgeIndices[0])
++            useIndex = edgeIndices[1];
++        else
++            useIndex = edgeIndices[0];
++
++        auto it = find(itemsToVisit.begin(), itemsToVisit.end(), useIndex);
++        if (it != itemsToVisit.end()) { //not visited, possible to visit
++            sum += e.pheromoneLevel;
++            possibleEdges.push_back(e);
++        }
++    }
++
++    if (sum == 0)
++        throw "Sum is zero";
++    //random number from 0 to sum
++    float randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/sum);
++
++    //subtract until you choose the set of edges
++    for (Edge e: possibleEdges) {
++        randomNumber -= e.pheromoneLevel;
++        if (randomNumber <= 0) {
++            //get the edge, and it's counterpart facing the opposite direction
++            vector<int> nextEdges = getEdgeIndices(e);
++            vector<int> toRet;
++            toRet.push_back(nextEdges[0]);
++            toRet.push_back(nextEdges[1]);
++            return toRet;
++        }
++    }
++
++    throw "Could not find next edge to visit";
++}
++
++ACO::ACO(float totalWeight, float pheremonesToDeposit, vector<Item> items) {
++
++    int currId = 0;
++    bestValue = 0;
++    bestSolution = "No solution found";
++
++    vector<vector<Edge>> allocEdges(items.size());
++    this->edges = allocEdges;
++
++    //initialise the vector (2d array of connections)
++    for (int i = 0; i < items.size(); i++) {
++        edges[i] = vector<Edge>(items.size());
++        for (int j = 0; j < items.size(); j++) {
++            Edge e{
++                .pheromoneLevel =  1
++            };
++            edges[i][j] = e;
++            edges[i][i].id = currId++;
++        }
++    }
++
++    this->items = items;
++    this->totalWeight = totalWeight;
++    this->pheremonesToDeposit = pheremonesToDeposit;
++
++    for (int i = 0; i < items.size(); i++)
++        indices.push_back(i);
++
++    srand (static_cast <unsigned> (time(0)));
++
++}
++
++void ACO::getFinalSolution() {
++    cout << "Final solution: " << bestSolution << endl;
++    float finalValue = 0;
++    for (int i = 0; i < bestSolution.length(); i++)
++        if (bestSolution[i] == '1')
++            finalValue += items[i].value;
++    cout << "Final value: " << finalValue << endl << endl;
++}
++
++void ACO::printGraph() {
++    cout << "-----------------------------" << endl;
++    for (auto & edge : edges) {
++        for (auto & j : edge)
++            cout << j.pheromoneLevel << " ";
++        cout << "\n";
++    }
++    cout << "-----------------------------" << endl;
++}
++
++void ACO::travelRoute() {
++    //get a random starting point
++    int itemStart = rand() % items.size();
++
++    string solutionString;
++    for (int i = 0; i < items.size(); i++)
++        solutionString += "0";
++    solutionString[itemStart] = '1';
++
++    vector<int> itemsToVisit;
++    for (int i = 0; i < items.size(); i++)
++        if (i != itemStart)
++            itemsToVisit.push_back(i);
++
++    vector<int> traveledEdges;
++
++    //travel the route and keep track of visited items and edges
++    float bagWeight = 0;
++    float bagValue = 0;
++
++    int itemIndex = itemStart;
++
++    vector<int> traveledEdgeIndices;
++
++    while (!itemsToVisit.empty()) {
++
++        //get the edge to follow, and push it
++        vector<int> nextEdges = getNextEdgesToVisit(itemIndex, itemsToVisit);
++        traveledEdges.push_back(nextEdges[0]);
++        traveledEdges.push_back(nextEdges[1]);
++
++        //get the index of the item visited from the edges
++        vector<int> currTraveled = getEdgeIndices(edges[nextEdges[0]][nextEdges[1]]);
++
++        //add the item weight to the bag
++        bagWeight += items[itemIndex].weight;
++        bagValue += items[itemIndex].value;
++        solutionString[itemIndex] = '1';
++
++        //remove the visited item
++        itemsToVisit.pop_back();
++
++        if (bagWeight < totalWeight) {
++            //push the traveled indices to the vector to deposit
++            traveledEdgeIndices.push_back(currTraveled[0]);
++            traveledEdgeIndices.push_back(currTraveled[1]);
++        }
++    }
++
++    cout << "Got a good route..." << solutionString << endl;
++    //if the route is valid, deposit on the traveled edges
++    for (int i = 0; i < traveledEdgeIndices.size(); i+=2) {
++        edges[traveledEdgeIndices[i]][traveledEdgeIndices[i + 1]].pheromoneLevel += pheremonesToDeposit;
++        edges[traveledEdgeIndices[i + 1]][traveledEdgeIndices[i]].pheromoneLevel += pheremonesToDeposit;
++    }
++
++    //if the solution is better than the best solution, store it
++    if (bagValue > bestValue) {
++        cout << "Got a better solution..." << endl;
++        bestValue = bagValue;
++        bestSolution = solutionString;
++    }
++
++}
+\ No newline at end of file
+Index: CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>cmake_minimum_required(VERSION 3.24)\r\nproject(COS314)\r\n\r\nset(CMAKE_CXX_STANDARD 14)\r\n\r\ninclude_directories(Assignment1)\r\n\r\nadd_executable(COS314\r\n        Assignment2/Genetic.h\r\n        Assignment2/Genetic.cpp\r\n        Assignment2/Knapsack.h\r\n        Assignment2/Knapsack.cpp\r\n        Assignment2/main.cpp\r\n        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h Assignment2/ACO.h)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	
++++ b/CMakeLists.txt	
+@@ -11,4 +11,4 @@
+         Assignment2/Knapsack.h
+         Assignment2/Knapsack.cpp
+         Assignment2/main.cpp
+-        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h Assignment2/ACO.h)
++        Assignment2/sharedTypes.h Assignment2/Genetic.cpp Assignment2/RouletteWheel.h Assignment2/ACO.h Assignment2/ACO.cpp)

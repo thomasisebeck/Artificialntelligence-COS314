@@ -2,11 +2,11 @@ main:
 	g++ -c -g *.cpp
 	g++ -o main *.o
 
-r: main
+run: main
 	./main
 
-c:
+clean:
 	rm *.o main
 
 val:
-	valgrind --leak-check=full -s ./main
+	valgrind --leak-check=full ./main

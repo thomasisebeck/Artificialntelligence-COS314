@@ -3,11 +3,8 @@ project(COS314New)
 
 set(CMAKE_CXX_STANDARD 14)
 
-include_directories(Assignment3)
+include_directories(Assigment3Retry)
 
 add_executable(COS314New
-        Assignment3/main.cpp
-        Assignment3/Network.h
-        Assignment3/Network.cpp
-        Assignment3/GP.cpp
-        Assignment3/sharedTypes.h)
+        Assigment3Retry/Matrix.cpp
+        Assigment3Retry/Matrix.h Assigment3Retry/Network.cpp Assigment3Retry/sharedTypes.h Assigment3Retry/main.cpp)
