@@ -23,7 +23,7 @@ struct dataInstace {
     vector<int> positive;
 };
 
-void shuffle(vector<dataInstace>& array) {
+void shuffle(vector<dataInstace> &array) {
     for (int i = 0; i < array.size(); i++) {
         int index1 = rand() % array.size();
         int index2 = rand() % array.size();
@@ -93,9 +93,9 @@ vector<dataInstace> readInstances() {
             line.erase(0, line.find(',') + 1);
 
             if (currValue == "no-recurrence-events")
-                instance.recurrent = { 0 };
+                instance.recurrent = {0};
             else if (currValue == "recurrence-events")
-                instance.recurrent = { 1 };
+                instance.recurrent = {1};
             else {
                 cout << "recurrent type: " << currValue << endl;
                 throw "recurrent type not found";
@@ -106,17 +106,17 @@ vector<dataInstace> readInstances() {
             line.erase(0, line.find(',') + 1);
 
             if (currValue == "20-29")
-                instance.age = { 0, 0, 0 };
+                instance.age = {0, 0, 0};
             else if (currValue == "30-39")
-                instance.age = { 0, 0, 1 };
+                instance.age = {0, 0, 1};
             else if (currValue == "40-49")
-                instance.age = { 0, 1, 0 };
+                instance.age = {0, 1, 0};
             else if (currValue == "50-59")
-                instance.age = { 0, 1, 1 };
+                instance.age = {0, 1, 1};
             else if (currValue == "60-69")
-                instance.age = { 1, 0, 0 };
+                instance.age = {1, 0, 0};
             else if (currValue == "70-79")
-                instance.age = { 1, 0, 1};
+                instance.age = {1, 0, 1};
             else {
                 cout << "age not found: " << currValue << endl;
                 throw "age not found";
@@ -141,27 +141,27 @@ vector<dataInstace> readInstances() {
             line.erase(0, line.find(',') + 1);
 
             if (currValue == "0-4")
-                instance.maturedBy = { 0, 0, 0, 0};
+                instance.maturedBy = {0, 0, 0, 0};
             else if (currValue == "5-9")
-                instance.maturedBy = { 0, 0, 0, 1};
+                instance.maturedBy = {0, 0, 0, 1};
             else if (currValue == "10-14")
-                instance.maturedBy = { 0, 0, 1, 0};
+                instance.maturedBy = {0, 0, 1, 0};
             else if (currValue == "15-19")
-                instance.maturedBy = { 0, 0, 1, 1};
+                instance.maturedBy = {0, 0, 1, 1};
             else if (currValue == "20-24")
-                instance.maturedBy = { 0, 1, 0, 0};
+                instance.maturedBy = {0, 1, 0, 0};
             else if (currValue == "25-29")
-                instance.maturedBy = { 0, 1, 0, 1};
+                instance.maturedBy = {0, 1, 0, 1};
             else if (currValue == "30-34")
-                instance.maturedBy = { 0, 1, 1, 0};
+                instance.maturedBy = {0, 1, 1, 0};
             else if (currValue == "35-39")
-                instance.maturedBy = { 0, 1, 1, 1};
+                instance.maturedBy = {0, 1, 1, 1};
             else if (currValue == "40-44")
-                instance.maturedBy = { 1, 0, 0, 0};
+                instance.maturedBy = {1, 0, 0, 0};
             else if (currValue == "45-49")
-                instance.maturedBy = { 1, 0, 0, 1};
+                instance.maturedBy = {1, 0, 0, 1};
             else if (currValue == "50-54")
-                instance.maturedBy = { 1, 0, 1, 0};
+                instance.maturedBy = {1, 0, 1, 0};
             else {
                 cout << currValue << endl;
                 throw "matured by not found";
@@ -172,19 +172,19 @@ vector<dataInstace> readInstances() {
             line.erase(0, line.find(',') + 1);
 
             if (currValue == "0-2")
-                instance.weeks = { 0, 0, 0, 0 };
+                instance.weeks = {0, 0, 0, 0};
             else if (currValue == "3-5")
-                instance.weeks = { 0, 0, 0, 1 };
+                instance.weeks = {0, 0, 0, 1};
             else if (currValue == "6-8")
-                instance.weeks = { 0, 0, 1, 0 };
+                instance.weeks = {0, 0, 1, 0};
             else if (currValue == "9-11")
-                instance.weeks = { 0, 0, 1, 1 };
+                instance.weeks = {0, 0, 1, 1};
             else if (currValue == "12-14")
-                instance.weeks = { 0, 1, 0, 0 };
+                instance.weeks = {0, 1, 0, 0};
             else if (currValue == "15-17")
-                instance.weeks = { 0, 1, 0, 1 };
+                instance.weeks = {0, 1, 0, 1};
             else if (currValue == "24-26")
-                instance.weeks = { 0, 1, 1, 0 };
+                instance.weeks = {0, 1, 1, 0};
             else {
                 cout << currValue << endl;
                 throw "weeks by not found";
@@ -195,14 +195,13 @@ vector<dataInstace> readInstances() {
             line.erase(0, line.find(',') + 1);
 
             if (currValue == "yes")
-                instance.isMalig = { 0, 0 };
+                instance.isMalig = {0, 0};
             else if (currValue == "no")
-                instance.isMalig = { 0, 1 };
+                instance.isMalig = {0, 1};
             else if (currValue == "?") {
                 discard = true;
                 instance.isMalig = {1, 0};
-            }
-            else {
+            } else {
                 cout << currValue << endl;
                 throw "is malig by not found";
             }
@@ -212,7 +211,7 @@ vector<dataInstace> readInstances() {
             line.erase(0, line.find(',') + 1);
 
             if (currValue == "1")
-                instance.size = { 0, 0};
+                instance.size = {0, 0};
             else if (currValue == "2")
                 instance.size = {0, 1};
             else if (currValue == "3")
@@ -252,8 +251,7 @@ vector<dataInstace> readInstances() {
             else if (currValue == "?") {
                 discard = true;
                 instance.specificSide = {1, 0, 1};
-            }
-            else {
+            } else {
                 cout << currValue << endl;
                 throw "size not found";
             }
@@ -277,7 +275,7 @@ vector<dataInstace> readInstances() {
 
         }
 
-    } catch (const char* err) {
+    } catch (const char *err) {
         cout << err << endl;
     }
 
@@ -285,94 +283,94 @@ vector<dataInstace> readInstances() {
 }
 
 void smallerNetwork() {
-        vector<int> topology = {3, 2};
+    vector<int> topology = {3, 2};
 
-        //change alpha to 0.25
-        Network n(topology, 0.5);
+    //change alpha to 0.25
+    Network n(topology, 0.5);
 
-        try {
+    try {
 
-            vector<vector<double>> trainingSetInput = {
-                    {0,    1,    1},
-                    {0,    0.9,  0.95},
-                    {0,    0.75, 0.91},
-                    {0.01, 1,    0.85},
+        vector<vector<double>> trainingSetInput = {
+                {0,    1,    1},
+                {0,    0.9,  0.95},
+                {0,    0.75, 0.91},
+                {0.01, 1,    0.85},
 
-                    {1,    0,    1},
-                    {0.9,  0,    0.95},
-                    {0.95, 0.05, 0.96},
-                    {0.98, 0.02, 1}
-            };
+                {1,    0,    1},
+                {0.9,  0,    0.95},
+                {0.95, 0.05, 0.96},
+                {0.98, 0.02, 1}
+        };
 
-            vector<vector<double>> trainingSetOutput = {
-                    {1, 0},
-                    {1, 0},
-                    {1, 0},
-                    {1, 0},
+        vector<vector<double>> trainingSetOutput = {
+                {1, 0},
+                {1, 0},
+                {1, 0},
+                {1, 0},
 
-                    {0, 1},
-                    {0, 1},
-                    {0, 1},
-                    {0, 1}
-            };
+                {0, 1},
+                {0, 1},
+                {0, 1},
+                {0, 1}
+        };
 
-            vector<vector<double>> testSetInput = {
-                    {0,    1,    1},
-                    {0,    0.9,  0.95},
-                    {0,    0.75, 0.91},
-                    {0.01, 1,    0.85},
+        vector<vector<double>> testSetInput = {
+                {0,    1,    1},
+                {0,    0.9,  0.95},
+                {0,    0.75, 0.91},
+                {0.01, 1,    0.85},
 
-                    {1,    0,    1},
-                    {0.9,  0,    0.95},
-                    {0.95, 0.05, 0.96},
-                    {0.98, 0.02, 1}
-            };
+                {1,    0,    1},
+                {0.9,  0,    0.95},
+                {0.95, 0.05, 0.96},
+                {0.98, 0.02, 1}
+        };
 
-            vector<vector<double>> testSetOutput = {
-                    {1, 0},
-                    {1, 0},
-                    {1, 0},
-                    {1, 0},
+        vector<vector<double>> testSetOutput = {
+                {1, 0},
+                {1, 0},
+                {1, 0},
+                {1, 0},
 
-                    {0, 1},
-                    {0, 1},
-                    {0, 1},
-                    {0, 1}
-            };
+                {0, 1},
+                {0, 1},
+                {0, 1},
+                {0, 1}
+        };
 
-            const int EPOCHS = 50;
+        const int EPOCHS = 50;
 
-            for (int i = 0; i < EPOCHS; i++) {
+        for (int i = 0; i < EPOCHS; i++) {
 
-                for (int trainingNumber = 0; trainingNumber < trainingSetInput.size(); trainingNumber++) {
-                    n.setInputVals(trainingSetInput[trainingNumber]);
-                    n.setTargetVals(trainingSetOutput[trainingNumber]);
-                    n.feedForward();
-                    n.resetErrorTerms();
-                    n.storeErrorTerms();
-                    n.backPropagate();
-                    n.correctWeights();
-                }
-
-            }
-
-            cout << "results: " << endl;
-
-            for (int testNumber = 0; testNumber < testSetInput.size(); testNumber++) {
-                n.setInputVals(testSetInput[testNumber]);
-                n.setTargetVals(testSetOutput[testNumber]);
+            for (int trainingNumber = 0; trainingNumber < trainingSetInput.size(); trainingNumber++) {
+                n.setInputVals(trainingSetInput[trainingNumber]);
+                n.setTargetVals(trainingSetOutput[trainingNumber]);
                 n.feedForward();
-                vector<double> outputValues = n.getOutputValues();
-                cout << round(testSetInput[testNumber][0]) << " "
-                     << round(testSetInput[testNumber][1]) << " "
-                     << round(testSetInput[testNumber][2]) << " = "
-                     << round(outputValues[0]) << " "
-                     << round(outputValues[1]) << endl;
+                n.resetErrorTerms();
+                n.storeErrorTerms();
+                n.backPropagate();
+                n.correctWeights();
             }
+
         }
-        catch( const char* msg) {
-            cout << msg << endl;
+
+        cout << "results: " << endl;
+
+        for (int testNumber = 0; testNumber < testSetInput.size(); testNumber++) {
+            n.setInputVals(testSetInput[testNumber]);
+            n.setTargetVals(testSetOutput[testNumber]);
+            n.feedForward();
+            vector<double> outputValues = n.getOutputValues();
+            cout << round(testSetInput[testNumber][0]) << " "
+                 << round(testSetInput[testNumber][1]) << " "
+                 << round(testSetInput[testNumber][2]) << " = "
+                 << round(outputValues[0]) << " "
+                 << round(outputValues[1]) << endl;
         }
+    }
+    catch (const char *msg) {
+        cout << msg << endl;
+    }
 };
 
 void largerNetwork() {
@@ -463,7 +461,7 @@ void largerNetwork() {
 
         //test the accuracy
 
-        for (dataInstace d : myInstances) {
+        for (dataInstace d: myInstances) {
             vector<vector<int>> inputVals = {
                     d.recurrent,
                     d.age,
@@ -510,15 +508,12 @@ void largerNetwork() {
         }
 
 
-
-
-    } catch (const char* msg) {
+    } catch (const char *msg) {
         cout << msg << endl;
     }
 
 
-
-    cout << "accuracy: " << setprecision(2) << static_cast<double>(correct) / total  * 100 << "%" << endl;
+    cout << "accuracy: " << setprecision(2) << static_cast<double>(correct) / total * 100 << "%" << endl;
     double precision = static_cast<double>(TP) / (TP + FP);
     double recall = static_cast<double>(TP) / (TP + FN);
     cout << "f-measure: " << setprecision(2) << static_cast<double>(2 * precision * recall) / (precision + recall);
