@@ -8,6 +8,8 @@
 
 using namespace std;
 
+//no-recurrence-events,30-39,premeno,30-34,0-2,no,3,left,left_low,no
+
 struct dataInstace {
     vector<int> recurrent;
     vector<int> age;
@@ -21,7 +23,7 @@ struct dataInstace {
     vector<int> positive;
 };
 
-void shuffle(vector <dataInstace> &array) {
+void shuffle(vector<dataInstace> &array) {
     for (int i = 0; i < array.size(); i++) {
         int index1 = rand() % array.size();
         int index2 = rand() % array.size();
@@ -31,7 +33,41 @@ void shuffle(vector <dataInstace> &array) {
     }
 }
 
-vector <dataInstace> readInstances() {
+/*
+ Network n({2, 3, 1}, 0.1);
+
+    n.connections[0].setWeight(0,0,0.11);
+    n.connections[0].setWeight(1,0,0.21);
+    n.connections[0].setWeight(0,1,0.12);
+    n.connections[0].setWeight(1,1,0.08);
+
+    n.connections[1].setWeight(1,0, 0.14);
+    n.connections[1].setWeight(0,0, 0.15);
+
+    try {
+
+        n.setInputVals({2, 3});
+        n.setTargetVals({1});
+
+        for (int i = 0; i < 200; i++) {
+
+            n.feedForward();
+            vector<double> outputValues = n.getOutputValues();
+            n.resetErrorTerms();
+            n.storeErrorTerms();
+            n.backPropagate();
+            n.correctWeights();
+            n.printOutputError();
+
+
+        }
+
+    } catch (const char* msg) {
+        cout << msg << endl;
+    }
+ */
+
+vector<dataInstace> readInstances() {
     ifstream myFile;
     myFile.open("data.txt");
 
@@ -39,7 +75,7 @@ vector <dataInstace> readInstances() {
     string currValue;
     getline(myFile, line);
 
-    vector <dataInstace> instances;
+    vector<dataInstace> instances;
 
     bool discard;
 
@@ -254,7 +290,7 @@ void smallerNetwork() {
 
     try {
 
-        vector <vector<double>> trainingSetInput = {
+        vector<vector<double>> trainingSetInput = {
                 {0,    1,    1},
                 {0,    0.9,  0.95},
                 {0,    0.75, 0.91},
@@ -266,7 +302,7 @@ void smallerNetwork() {
                 {0.98, 0.02, 1}
         };
 
-        vector <vector<double>> trainingSetOutput = {
+        vector<vector<double>> trainingSetOutput = {
                 {1, 0},
                 {1, 0},
                 {1, 0},
@@ -278,7 +314,7 @@ void smallerNetwork() {
                 {0, 1}
         };
 
-        vector <vector<double>> testSetInput = {
+        vector<vector<double>> testSetInput = {
                 {0,    1,    1},
                 {0,    0.9,  0.95},
                 {0,    0.75, 0.91},
@@ -290,7 +326,7 @@ void smallerNetwork() {
                 {0.98, 0.02, 1}
         };
 
-        vector <vector<double>> testSetOutput = {
+        vector<vector<double>> testSetOutput = {
                 {1, 0},
                 {1, 0},
                 {1, 0},
@@ -338,7 +374,7 @@ void smallerNetwork() {
 };
 
 void largerNetwork() {
-    vector <dataInstace> myInstances = readInstances();
+    vector<dataInstace> myInstances = readInstances();
     shuffle(myInstances);
 
     vector<int> topology = {22, 1};
@@ -348,8 +384,12 @@ void largerNetwork() {
 
     const int TRAINING_ITERATIONS = 50;
 
+    int total = 0;
+    int correct = 0;
+
     int TP = 0;
     int FP = 0;
+    int TN = 0;
     int FN = 0;
 
     bool converged = false;
@@ -373,7 +413,7 @@ void largerNetwork() {
 
                     for (int inner = 0; inner < 5; inner++) {
 
-                        vector <vector<int>> inputVals = {
+                        vector<vector<int>> inputVals = {
                                 myInstances[outer + inner + (outer % 2)].recurrent,
                                 myInstances[outer + inner + (outer % 2)].age,
                                 myInstances[outer + inner + (outer % 2)].maturity,
@@ -394,6 +434,8 @@ void largerNetwork() {
                         vector<double> targetVals = {
                                 static_cast<double>(myInstances[outer + inner + (outer % 2)].positive[0])
                         };
+
+//                            cout << useInputVals.size() << endl;
 
                         n.setInputVals(useInputVals);
                         n.setTargetVals(targetVals);
@@ -420,7 +462,7 @@ void largerNetwork() {
         //test the accuracy
 
         for (dataInstace d: myInstances) {
-            vector <vector<int>> inputVals = {
+            vector<vector<int>> inputVals = {
                     d.recurrent,
                     d.age,
                     d.maturity,
@@ -465,9 +507,11 @@ void largerNetwork() {
             total++;
         }
 
+
     } catch (const char *msg) {
         cout << msg << endl;
     }
+
 
     cout << "accuracy: " << setprecision(2) << static_cast<double>(correct) / total * 100 << "%" << endl;
     double precision = static_cast<double>(TP) / (TP + FP);
@@ -476,6 +520,8 @@ void largerNetwork() {
 }
 
 int main() {
+
     largerNetwork();
+
     return 0;
 }
