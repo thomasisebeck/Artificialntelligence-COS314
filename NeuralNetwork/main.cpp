@@ -33,40 +33,6 @@ void shuffle(vector<dataInstace>& array) {
     }
 }
 
-/*
- Network n({2, 3, 1}, 0.1);
-
-    n.connections[0].setWeight(0,0,0.11);
-    n.connections[0].setWeight(1,0,0.21);
-    n.connections[0].setWeight(0,1,0.12);
-    n.connections[0].setWeight(1,1,0.08);
-
-    n.connections[1].setWeight(1,0, 0.14);
-    n.connections[1].setWeight(0,0, 0.15);
-
-    try {
-
-        n.setInputVals({2, 3});
-        n.setTargetVals({1});
-
-        for (int i = 0; i < 200; i++) {
-
-            n.feedForward();
-            vector<double> outputValues = n.getOutputValues();
-            n.resetErrorTerms();
-            n.storeErrorTerms();
-            n.backPropagate();
-            n.correctWeights();
-            n.printOutputError();
-
-
-        }
-
-    } catch (const char* msg) {
-        cout << msg << endl;
-    }
- */
-
 vector<dataInstace> readInstances() {
     ifstream myFile;
     myFile.open("data.txt");
@@ -289,8 +255,6 @@ void largerNetwork() {
     unsigned int seed = time(0);
     cout << setprecision(100) << seed << endl;
 
-    //1686126641 =
-
     vector<dataInstace> myInstances = readInstances();
     shuffle(myInstances);
 
@@ -439,8 +403,6 @@ void largerNetwork() {
 }
 
 int main() {
-
     largerNetwork();
-
     return 0;
 }
