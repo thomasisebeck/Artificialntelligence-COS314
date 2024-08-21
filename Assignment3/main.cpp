@@ -71,6 +71,11 @@ vector<dataInstace> readInstances() {
     ifstream myFile;
     myFile.open("data.txt");
 
+    if (!myFile) {
+        cout << "make sure the file is in the cmake directory" << endl;
+        throw "cannot read data";
+    }
+
     string line;
     string currValue;
     getline(myFile, line);
