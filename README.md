@@ -1,4 +1,4 @@
-# Repository for AI problems
+# AI problems
 
 Genetic Algorithms: 
  - Ant Colony Optimisation and Genetic Algorithms to solve the Knapsack Problem
